@@ -92,10 +92,10 @@ fi
 
 # Username and password are for gitlab. And they are only used when
 # cloning private dotfiles_ng repository.
-read -p "Enter your github/gitlab username: " GITUSERNAME -r
-read -sp "Enter your github/gitlab password: " GITPASSWORD -r
+read -rp "Enter your github/gitlab username: " GITUSERNAME
+read -rsp "Enter your github/gitlab password: " GITPASSWORD
 echo
-read -p "Enter your email address: " GITEMAIL -r
+read -rp "Enter your email address: " GITEMAIL
 
 echo "Is this a server or desktop?"
 select machine in Server Desktop
@@ -119,17 +119,21 @@ git ls-remote \
     "https://$GITUSERNAME:$GITPASSWORD@gitlab.com/tricarte/dotfiles_ng.git" > /dev/null 2>&1 \
     || ( echo "Gitlab credentials are not working. Exiting..."; exit 1; )
     
-if [[ $SERVER ]]; then
-    read -p "Would you like to create a new user with root privileges: (y/n) " -r
+if [[ $SERVER == 1 ]]; then
+    read -rp "Would you like to create a new user with root privileges: (y/n) "
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
-        read -p "Enter new user name: " USRNAME -r
+        read -rp "Enter new user name: " USRNAME
         if [[ -n $USRNAME ]]; then
             sudo useradd -m "$USRNAME" -G sudo --shell /bin/bash
             sudo passwd "$USRNAME"
             sudo passwd -l root
         fi
     fi
+fi
+
+if [[ $SERVER == 1 ]]; then
+    read -rp "What port would you like to use for the ssh server?: " SSHPORT
 fi
 
 # https://gist.github.com/lukechilds/a83e1d7127b78fef38c2914c4ececc3c
@@ -310,7 +314,7 @@ sudo apt update && sudo apt upgrade -y
 
 if [[ $SERVER == 1 ]]; then
     if [[ -f /etc/ssh/sshd_config ]]; then
-        sudo sed -i -e 's/#Port 22/Port 50032/g' /etc/ssh/sshd_config
+        sudo sed -i -e "s/#Port 22/Port ${SSHPORT}/g" /etc/ssh/sshd_config
         # TODO: Other settings:
         # AddressFamily inet : to disable IPv6
         # PubkeyAuthentication yes
