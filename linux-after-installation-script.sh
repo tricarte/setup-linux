@@ -23,7 +23,6 @@
 # TODO: dropwatch
 # TODO: https://github.com/rahulunair/repo-peek Tool to browse Github/Gitlab
 # repo using vim.
-# TODO: For latest NVIDIA drivers: sudo add-apt-repository ppa:graphics-drivers/ppa
 # TODO: Change /etc/vnstat.conf interface name using GWIFACE. vnstat auto detects the
 # outgoing interface. This is probably necessary for php-vnstat thing.
 # TODO: apticron thing.
@@ -34,7 +33,6 @@
 # TODO: nginx is installed disabled.
 # TODO: https://github.com/vinceliuice/grub2-themes Use "tela" theme.
 # TODO: disable performance_schema = off for mysql/mariadb
-# TODO: Automate this: https://github.com/black7375/Firefox-UI-Fix
 # TODO: mysql_secure_installation and mysqltuner after the installation.
 # mysql_secure_installation can be scripted in SQL.
 : "
@@ -702,6 +700,7 @@ if [[ $SERVER == 0 ]]; then
     # Add below repo URL to Discover after installing plasma-discover-flatpak-backend.
     # https://flathub.org/repo/flathub.flatpakrepo
 
+# ppa:graphics-drivers/ppa : Latest NVIDIA drivers
     PPAS=(
         "ppa:maarten-baert/simplescreenrecorder"
         "ppa:kisak/kisak-mesa"
@@ -710,6 +709,7 @@ if [[ $SERVER == 0 ]]; then
         "ppa:kdenlive/kdenlive-stable"
         "ppa:slgobinath/safeeyes"
         "ppa:jonmagon/kdiskmark"
+        "ppa:graphics-drivers/ppa"
     )
 
     for ppa in "${PPAS[@]}"
