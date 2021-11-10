@@ -622,6 +622,9 @@ sed -i -e "s:change_iface:$GWIFACE:g" "$HOME/.tmux/resurrect/last"
 sed -i -e "s:change_ip:$IPADDR:g" "$HOME/.tmux/resurrect/last"
 tmux kill-session -t test
 
+# do not list untracked files and directories while "dotfiles status" in $HOME
+git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" config --local status.showUntrackedFiles no
+
 # Install Mariadb 10.5
 # https://downloads.mariadb.org/mariadb/repositories/#distro=Ubuntu&mirror=nus
 # TODO: Installing the 'mariadb-server' package is not working. Specify the version explicitly.
