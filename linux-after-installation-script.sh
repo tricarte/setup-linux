@@ -31,7 +31,6 @@
     # vim /etc/default/motd-news:
     # ENABLED=0
 # TODO: https://github.com/meesaltena/SSHHeatmap
-# TODO: https://github.com/JonMagon/KDiskMark crystaldiskmark alternative
 # TODO: nginx is installed disabled.
 # TODO: https://github.com/vinceliuice/grub2-themes Use "tela" theme.
 # TODO: disable performance_schema = off for mysql/mariadb
@@ -156,9 +155,9 @@ PPAS=(
 
 sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
 
-for ppa in PPAS
+for ppa in "${PPAS[@]}"
 do
-    sudo add-apt-repository -y $ppa -n
+    sudo add-apt-repository -y "$ppa" -n
 done
 
 sudo apt update && sudo apt upgrade
@@ -710,11 +709,12 @@ if [[ $SERVER == 0 ]]; then
         "ppa:ubuntuhandbook1/gimp"
         "ppa:kdenlive/kdenlive-stable"
         "ppa:slgobinath/safeeyes"
+        "ppa:jonmagon/kdiskmark"
     )
 
-    for ppa in $PPAS
+    for ppa in "${PPAS[@]}"
     do
-        sudo add-apt-repository -y $ppa -n
+        sudo add-apt-repository -y "$ppa" -n
     done
 
     sudo apt update && sudo apt upgrade
