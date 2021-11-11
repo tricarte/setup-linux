@@ -58,8 +58,6 @@ EOS
 # real servers. A set of tools for monitoring and tuning the network stack.
 # TODO: https://github.com/skx/sysadmin-util
 # TODO: Consider using shush or cronic instead of cron.
-# TODO: We will install gdebi-core. After that you can use "gdebi" instead of "dpkg -i"
-# to auto install with dependencies.
 # TODO: golang can be installed with this script easily.
 # https://github.com/udhos/update-golang
 # TODO: themer.dev: Generate colorschemes for terminal, editors, wallpapers
@@ -134,6 +132,7 @@ if [[ $SERVER == 1 ]]; then
 fi
 
 # https://gist.github.com/lukechilds/a83e1d7127b78fef38c2914c4ececc3c
+# Get the latest release version number of a github project.
 get_latest_release() {
     curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
         grep '"tag_name":' |                                            # Get tag line
@@ -317,13 +316,12 @@ if [[ $SERVER == 1 ]]; then
         # PubkeyAuthentication yes
         # PasswordAuthentication no
         # PermitRootLogin no
-        sudo service ssh restart
+        sudo systemctl restart ssh
     fi
 fi
 
 mkdir "$HOME/dotfiles-original"
 cp .bashrc .profile "$HOME/dotfiles-original"
-
 
 if [[ $SERVER == 1 ]]; then
     # Check these permissions from sshkeygen.io
@@ -361,8 +359,8 @@ mkdir -p "$HOME/bin"  \
 # TODO: mariadb-client is not installable. So I removed it.
 # sudo apt install mariadb-client-10.5 : works
 # The same thing applies to mariadb server: sudo apt install mariadb-server-10.5
-# TODO: darkstat can be an alternative to vnstat with web interface.
-# TODO: googler from default repos is not working, github version may work.
+# darkstat can be an alternative to vnstat with web interface.
+# You can use "gdebi" instead of "dpkg -i" to install packages with their dependencies.
 sudo apt install -y python3-pip xsel mtr-tiny pydf \
   software-properties-common \
   build-essential libssl-dev cmake pkg-config \
@@ -596,7 +594,7 @@ git config --global core.excludesfile ~/.gitignore_global
 # Don't require password for these executables.
 echo "$(whoami) ALL=NOPASSWD: /usr/sbin/iftop, /usr/bin/dnstop, /usr/sbin/iotop, /home/$(whoami)/repos/nettop/nettop" | sudo EDITOR='tee -a' visudo
 
-# Install dotfiles
+# Install dotfiles (the old way using stow)
 # cd ~ || exit
 # git clone "https://$GITUSERNAME:$GITPASSWORD@gitlab.com/tricarte/dotfiles.git"
 # cd ~/dotfiles || exit
@@ -622,8 +620,11 @@ sed -i -e "s:change_iface:$GWIFACE:g" "$HOME/.tmux/resurrect/last"
 sed -i -e "s:change_ip:$IPADDR:g" "$HOME/.tmux/resurrect/last"
 tmux kill-session -t test
 
-# do not list untracked files and directories while "dotfiles status" in $HOME
+# Do not list untracked files and directories while "dotfiles status" in $HOME
 git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" config --local status.showUntrackedFiles no
+# Switch from http to ssh for gitlab authentication.
+git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" remote set-url origin git@gitlab.com:tricarte/dotfiles_ng.git
+git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" core.sshCommand "ssh -o IdentitiesOnly=yes -i ~/.ssh/github-id_rsa -F /dev/null"
 
 # Install Mariadb 10.5
 # https://downloads.mariadb.org/mariadb/repositories/#distro=Ubuntu&mirror=nus
@@ -704,6 +705,7 @@ if [[ $SERVER == 0 ]]; then
     # https://flathub.org/repo/flathub.flatpakrepo
 
 # ppa:graphics-drivers/ppa : Latest NVIDIA drivers
+# ppa:kisak/kisak-mesa: Latest stable Mesa drivers
     PPAS=(
         "ppa:maarten-baert/simplescreenrecorder"
         "ppa:kisak/kisak-mesa"
