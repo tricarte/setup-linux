@@ -18,7 +18,6 @@
 # SERVER: After configuring ssmtp or msmtp correctly, you do not have to touch php.ini.
 # Because these smtp clients creates symlinks to sendmail which is used by PHP by default.
 
-# TODO: Should we really install Mariadb through the ppa?
 # TODO: Disable nginx and mariadb if this is a desktop.
 # TODO: dropwatch
 # TODO: https://github.com/rahulunair/repo-peek Tool to browse Github/Gitlab
@@ -30,7 +29,7 @@
     # vim /etc/default/motd-news:
     # ENABLED=0
 # TODO: https://github.com/meesaltena/SSHHeatmap
-# TODO: nginx is installed disabled.
+# TODO: Is nginx is installed disabled?
 # TODO: https://github.com/vinceliuice/grub2-themes Use "tela" theme.
 # TODO: disable performance_schema = off for mysql/mariadb
 # TODO: mysql_secure_installation and mysqltuner after the installation.
@@ -146,11 +145,8 @@ PPAS=(
     "ppa:ondrej/php"
     "ppa:ondrej/nginx"
     "ppa:jonathonf/vim-daily"
-    "deb [arch=amd64,arm64,ppc64el] http://nyc2.mirrors.digitalocean.com/mariadb/repo/10.5/ubuntu focal main"
     "ppa:bashtop-monitor/bashtop"
 )
-
-sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
 
 for ppa in "${PPAS[@]}"
 do
@@ -356,9 +352,6 @@ mkdir -p "$HOME/bin"  \
 # secure-delete: Provides srm instead of rm.
 # libncurses5 is needed for nettop
 # mailutils provide mailx which is used by ngxblocker to send its mails.
-# TODO: mariadb-client is not installable. So I removed it.
-# sudo apt install mariadb-client-10.5 : works
-# The same thing applies to mariadb server: sudo apt install mariadb-server-10.5
 # darkstat can be an alternative to vnstat with web interface.
 # You can use "gdebi" instead of "dpkg -i" to install packages with their dependencies.
 sudo apt install -y python3-pip xsel mtr-tiny pydf \
@@ -626,15 +619,17 @@ git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" config --local status.showU
 git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" remote set-url origin git@gitlab.com:tricarte/dotfiles_ng.git
 git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" core.sshCommand "ssh -o IdentitiesOnly=yes -i ~/.ssh/github-id_rsa -F /dev/null"
 
-# Install Mariadb 10.5
-# https://downloads.mariadb.org/mariadb/repositories/#distro=Ubuntu&mirror=nus
-# TODO: Installing the 'mariadb-server' package is not working. Specify the version explicitly.
-# sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
-# sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
-# sudo add-apt-repository -y 'deb [arch=amd64,arm64,ppc64el] http://nyc2.mirrors.digitalocean.com/mariadb/repo/10.5/ubuntu focal main'
-# sudo apt install mariadb-server -y
-sudo apt install -y mariadb-server-10.5
-# 'sudo mysql' drops you into sql shell by default. But you can't do anything admin related.
+# Install Mariadb
+sudo apt install mariadb-server -y
+# 'sudo mysql' drops you into sql shell by default.
+# But you can't do anything admin related.
+
+# It is recommended that you would better not touch the root authentication method
+# which is based on unix_socket. Creating another admin user is a better idea.
+# TODO: Script below...
+# sudo mariadb
+# GRANT ALL ON *.* TO 'admin'@'localhost' IDENTIFIED BY 'password' WITH GRANT OPTION;
+# FLUSH PRIVILEGES;
 
 # Check current authentication plugin:
 # Try logging in using `sudo mysql` if unix_socket plugin is active.
@@ -660,7 +655,7 @@ sudo apt install -y mariadb-server-10.5
 # For some clients caching_sha2_password plugin can be troublesome. Use
 # mysql_native_password instead.
 
-# TODO: Now the mysql_secure_installation thing.
+# TODO: Now do the mysql_secure_installation thing.
 
 # /etc/mysql/mariadb.conf.d/50-server.cnf is the default config file.
 
