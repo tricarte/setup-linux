@@ -354,6 +354,7 @@ mkdir -p "$HOME/bin"  \
 # mailutils provide mailx which is used by ngxblocker to send its mails.
 # darkstat can be an alternative to vnstat with web interface.
 # You can use "gdebi" instead of "dpkg -i" to install packages with their dependencies.
+# chkservice: list/start/stop systemd services.
 sudo apt install -y python3-pip xsel mtr-tiny pydf \
   software-properties-common \
   build-essential libssl-dev cmake pkg-config \
@@ -365,7 +366,7 @@ sudo apt install -y python3-pip xsel mtr-tiny pydf \
   curl stow dnsutils git gawk mediainfo rlwrap ppa-purge \
   apache2-utils ntpdate watchman incron \
   renameutils libncurses5 mysqltuner gdebi-core mailutils \
-  iotop lshw hwinfo pv libnss3-tools jq
+  iotop lshw hwinfo pv libnss3-tools jq chkservice
 
 if [[ $SERVER == 1 ]]; then
     sudo chmod u+s /usr/sbin/ntpdate
