@@ -777,6 +777,7 @@ EOT
         git clone "https://github.com/tricarte/wpready3" "$HOME/repos/wpready3"
         chmod +x "$HOME/repos/wpsite/wpsite"
         ln -s "$HOME/repos/wpsite/wpsite" "$HOME/bin/wpsite"
+        ln -s "$HOME/bin/wpsite" "$HOME/bin/wps"
         ln -s "$HOME/repos/wpsite/.wpsite-completion.bash" "$HOME/.wpsite-completion.bash"
 
 fi # End of installation of desktop applications
