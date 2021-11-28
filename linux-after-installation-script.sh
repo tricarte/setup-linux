@@ -373,17 +373,8 @@ if [[ $SERVER == 1 ]]; then
     ntpdate -u ntp.ubuntu.com
 fi
 
-# sudo add-apt-repository -y ppa:ondrej/php
-# Ondre advices to install nginx from his own PPA.
-# Latest nginx stable.
-# sudo add-apt-repository -y ppa:ondrej/nginx
-# Below is the mainline nginx if you want to use official PPA.
-# sudo add-apt-repository -y ppa:nginx/development
-# sudo apt upgrade -y
-
 # Install nginx and php 7.4 both from ondrej/ppa
 # This one uses nginx from ondrej.
-# FIXME: Can we get rid of version numbers?
 sudo apt install -y nginx libnginx-mod-http-cache-purge php7.4-fpm php7.4-cli \
     php7.4-pgsql php7.4-sqlite3 php7.4-gd \
     php7.4-curl php-memcached \
@@ -424,10 +415,11 @@ fi
 # sudo update-alternatives --set editor /usr/local/bin/vim
 # sudo update-alternatives --install /usr/bin/vi vi /usr/local/bin/vim 1
 # sudo update-alternatives --set vi /usr/local/bin/vim
-sudo update-alternatives --install /usr/bin/editor editor /usr/bin/vim 1
-sudo update-alternatives --set editor /usr/bin/vim
-sudo update-alternatives --install /usr/bin/vi vi /usr/bin/vim 1
-sudo update-alternatives --set vi /usr/bin/vim
+VIM=$(command -v vim)
+sudo update-alternatives --install /usr/bin/editor editor $VIM 1
+sudo update-alternatives --set editor $VIM
+sudo update-alternatives --install /usr/bin/vi vi $VIM 1
+sudo update-alternatives --set vi $VIM
 
 # Build and install tmux
 # sudo apt remove --purge tmux -y
