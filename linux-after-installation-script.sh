@@ -507,6 +507,10 @@ curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | sudo tee /us
 echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 sudo apt-get update && sudo apt-get install yarn
 
+# degit: can install github repositories without its git history.
+# also can download sub directory of a git repo.
+npm install -g degit
+
 # Install fd.
 # This is for speeding up fuzzy search in ranger,
 # as it is using fzf with 'find' command.
