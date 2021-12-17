@@ -355,6 +355,7 @@ mkdir -p "$HOME/bin"  \
 # darkstat can be an alternative to vnstat with web interface.
 # You can use "gdebi" instead of "dpkg -i" to install packages with their dependencies.
 # chkservice: list/start/stop systemd services.
+# pv: pipe viewer
 sudo apt install -y python3-pip xsel mtr-tiny pydf \
   software-properties-common \
   build-essential libssl-dev cmake pkg-config \
@@ -736,6 +737,7 @@ if [[ $SERVER == 0 ]]; then
         simplescreenrecorder \
         sqlitebrowser \
         ubuntu-restricted-addons \
+        filelight
 
         composer global require cpriego/valet-linux
         valet install
