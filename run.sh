@@ -657,6 +657,49 @@ sudo apt install mariadb-server -y
 
 # /etc/mysql/mariadb.conf.d/50-server.cnf is the default config file.
 
+# Create a custom mariadb config file
+sudo touch /etc/mysql/mariadb.conf.d/60-server.cnf
+echo "
+[server]
+slow-query-log=1
+slow_query_log_file = /var/lib/mysql/mysql-slow.log
+log_slow_verbosity     = query_plan,explain
+long_query_time = 1
+# Below will pollute the mysql-slow.log file as it will log nearly every query.
+# log_queries_not_using_indexes=ON
+skip-name-resolve
+
+# This size should contain most of the active data set of your server so that
+# SQL request can work directly with information in the buffer pool cache.
+# Default is 128MB in bytes.
+# innodb_buffer_pool_size=134217728
+
+# Default is 151
+# max_connections
+
+# Default is the number of cores you have.
+# thread_pool_size
+
+# MariaDB uses temp tables for sorting. If you have a big sort (ORDER BY, GROUP BY etc.)
+# that exceeds the limit set for temp tables, then MariaDB may have to page to
+# disk, which is much slower.
+
+# Default is 16MB in bytes.
+# max_heap_table_size
+
+# Used for sorting large tables.
+# Default is 16MB in bytes.
+# tmp_table_size
+
+# Use below status variables to find out how much swapping has occured
+# for tmp tables in memory.
+# show status like 'Created_tmp_disk_tables' 
+# show status like 'Created_tmp_disk'
+
+# Enable query cache
+query_cache_type=1
+" | sudo tee -a /etc/mysql/mariadb.conf.d/60-server.cnf
+
 # Install tokudb engine for mariadb
 sudo apt install -y mariadb-plugin-tokudb
 
