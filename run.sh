@@ -356,6 +356,7 @@ mkdir -p "$HOME/bin"  \
 # You can use "gdebi" instead of "dpkg -i" to install packages with their dependencies.
 # chkservice: list/start/stop systemd services.
 # pv: pipe viewer
+# hey: http load testing - alternative ab (apache benchmark)
 sudo apt install -y python3-pip xsel mtr-tiny pydf \
   software-properties-common \
   build-essential libssl-dev cmake pkg-config \
@@ -365,9 +366,10 @@ sudo apt install -y python3-pip xsel mtr-tiny pydf \
   shellcheck sqlite3 dnstop libpcap-dev libncurses5-dev \
   libsqlite3-dev autoconf secure-delete \
   curl stow dnsutils git gawk mediainfo rlwrap ppa-purge \
-  apache2-utils ntpdate watchman incron \
+  apache2-utils ntpdate watchman incron hey \
   renameutils libncurses5 mysqltuner gdebi-core mailutils \
-  iotop lshw hwinfo pv libnss3-tools jq chkservice
+  iotop lshw hwinfo pv libnss3-tools jq chkservice \
+  optipng pngquant jpegoptim imagemagick
 
 if [[ $SERVER == 1 ]]; then
     sudo chmod u+s /usr/sbin/ntpdate
