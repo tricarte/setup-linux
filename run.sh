@@ -92,15 +92,27 @@ if [[ ! $GWIFACE =~ ^[we] ]]; then
     exit 1
 fi
 
-# Username and password are for gitlab. And they are only used when
+# Credentials are for gitlab. And they are only used when
 # cloning private dotfiles_ng repository.
 read -rp "Enter your github/gitlab username: " GITUSERNAME
 # Not using password any more because of ssh keys. You must configure your
-# gitlab ssh keys before running this script.
 # read -rsp "Enter your github/gitlab password: " GITPASSWORD
 echo
 read -rp "Enter your email address: " GITEMAIL
 
+if [[ ! -f ~/.ssh/github-id_rsa ]]; then
+    echo "Generating key pair for use with github/gitlab..."
+    ssh-keygen -t rsa -f ~/.ssh/github-id_rsa -b 4096 -C "$GITEMAIL" -q -P ""
+    echo "Key pair created. Now before continuing,"
+    echo "add the created public key to your gitlab/github account."
+    exit
+fi
+
+# git ls-remote "https://$GITUSERNAME:$GITPASSWORD@gitlab.com/tricarte/dotfiles_ng.git" > /dev/null 2>&1 \
+#     || ( echo "Gitlab credentials are not working. Exiting..."; exit 1; )
+git ls-remote "git@gitlab.com:tricarte/dotfiles_ng.git" > /dev/null 2>&1 \
+    || ( echo "Gitlab credentials are not working. Exiting..."; exit 1; )
+    
 echo "Is this a server or desktop?"
 select machine in Server Desktop
 do
@@ -119,11 +131,8 @@ do
 esac
 done
 
-# git ls-remote "https://$GITUSERNAME:$GITPASSWORD@gitlab.com/tricarte/dotfiles_ng.git" > /dev/null 2>&1 \
-#     || ( echo "Gitlab credentials are not working. Exiting..."; exit 1; )
-git ls-remote "git@gitlab.com:tricarte/dotfiles_ng.git" > /dev/null 2>&1 \
-    || ( echo "Gitlab credentials are not working. Exiting..."; exit 1; )
-    
+# FIXME: If checking for root at the beginning applies, then below is useless
+# Because you'll want to ask this question only when running on a vps with only root user.
 if [[ $SERVER == 1 ]]; then
     read -rp "Would you like to create a new user with root privileges: (y/n) "
     if [[ $REPLY =~ ^[Yy]$ ]]
