@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if [ "$(id -u)" == "0" ]; then
+   echo "This script must not be run as root." 1>&2
+   exit 1
+fi
+
 # https://devhints.io/bash For quick bash reference
 # https://usedevbook.com stackoverflow and language documentation searcher.
 
@@ -75,6 +80,9 @@ EOS
 #     IdentityFile ~/.ssh/private-key-file
 #     IdentitiesOnly yes
 
+# Installing prerequisites
+sudo apt install git software-properties-common rsync -y
+
 GWIFACE=$(ip route | grep default | cut -d" " -f5)
 IPADDR=$(hostname -I)
 
@@ -87,7 +95,9 @@ fi
 # Username and password are for gitlab. And they are only used when
 # cloning private dotfiles_ng repository.
 read -rp "Enter your github/gitlab username: " GITUSERNAME
-read -rsp "Enter your github/gitlab password: " GITPASSWORD
+# Not using password any more because of ssh keys. You must configure your
+# gitlab ssh keys before running this script.
+# read -rsp "Enter your github/gitlab password: " GITPASSWORD
 echo
 read -rp "Enter your email address: " GITEMAIL
 
@@ -109,8 +119,9 @@ do
 esac
 done
 
-git ls-remote \
-    "https://$GITUSERNAME:$GITPASSWORD@gitlab.com/tricarte/dotfiles_ng.git" > /dev/null 2>&1 \
+# git ls-remote "https://$GITUSERNAME:$GITPASSWORD@gitlab.com/tricarte/dotfiles_ng.git" > /dev/null 2>&1 \
+#     || ( echo "Gitlab credentials are not working. Exiting..."; exit 1; )
+git ls-remote "git@gitlab.com:tricarte/dotfiles_ng.git" > /dev/null 2>&1 \
     || ( echo "Gitlab credentials are not working. Exiting..."; exit 1; )
     
 if [[ $SERVER == 1 ]]; then
@@ -153,7 +164,7 @@ do
     sudo add-apt-repository -y "$ppa" -n
 done
 
-sudo apt update && sudo apt upgrade
+sudo apt update -y && sudo apt upgrade -y
 
 if [[ $SERVER == 1 ]]; then
     # This may only be necessary in cloud servers.
@@ -302,7 +313,7 @@ vm.vfs_cache_pressure=50
 fi
 
 cd ~ || exit
-sudo apt update && sudo apt upgrade -y
+sudo apt update -y && sudo apt upgrade -y
 
 if [[ $SERVER == 1 ]]; then
     if [[ -f /etc/ssh/sshd_config ]]; then
@@ -508,7 +519,7 @@ sudo apt install -y nodejs
 # Install yarn.
 curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/yarnkey.gpg >/dev/null
 echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-sudo apt-get update && sudo apt-get install yarn
+sudo apt update -y && sudo apt install yarn -y
 
 # degit: can install github repositories without its git history.
 # also can download sub directory of a git repo.
@@ -600,7 +611,8 @@ echo "$(whoami) ALL=NOPASSWD: /usr/sbin/iftop, /usr/bin/dnstop, /usr/sbin/iotop,
 # tmux kill-session -t test
 
 # Install dotfiles_ng
-git clone --separate-git-dir="$HOME/.dotfiles" "https://$GITUSERNAME:$GITPASSWORD@gitlab.com/tricarte/dotfiles_ng.git" tmpdotfiles
+# git clone --separate-git-dir="$HOME/.dotfiles" "https://$GITUSERNAME:$GITPASSWORD@gitlab.com/tricarte/dotfiles_ng.git" tmpdotfiles
+git clone --separate-git-dir="$HOME/.dotfiles" "git@gitlab.com:tricarte/dotfiles_ng.git" tmpdotfiles
 rsync --recursive --verbose --exclude '.git' tmpdotfiles/ "$HOME/"
 rm -r tmpdotfiles
 
@@ -617,7 +629,7 @@ tmux kill-session -t test
 git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" config --local status.showUntrackedFiles no
 # Switch from http to ssh for gitlab authentication.
 git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" remote set-url origin git@gitlab.com:tricarte/dotfiles_ng.git
-git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" core.sshCommand "ssh -o IdentitiesOnly=yes -i ~/.ssh/github-id_rsa -F /dev/null"
+git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" config core.sshCommand "ssh -o IdentitiesOnly=yes -i ~/.ssh/github-id_rsa -F /dev/null"
 
 # Install Mariadb
 sudo apt install mariadb-server -y
@@ -760,7 +772,7 @@ if [[ $SERVER == 0 ]]; then
         sudo add-apt-repository -y "$ppa" -n
     done
 
-    sudo apt update && sudo apt upgrade
+    sudo apt update -y && sudo apt upgrade -y
 
     # ubuntu-restricted-addons: For Intel Quick Sync accelerated video encoding in Kdenlive
     # feh: Fast image file viewer
