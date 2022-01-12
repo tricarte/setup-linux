@@ -387,7 +387,7 @@ sudo apt install -y python3-pip xsel mtr-tiny pydf \
   libsqlite3-dev autoconf secure-delete \
   curl stow dnsutils git gawk mediainfo rlwrap ppa-purge \
   apache2-utils ntpdate watchman incron hey \
-  renameutils libncurses5 mysqltuner gdebi-core mailutils \
+  renameutils libncurses5 mysqltuner gdebi-core mailutils postfix- \
   iotop lshw hwinfo pv libnss3-tools jq chkservice \
   optipng pngquant jpegoptim imagemagick
 
