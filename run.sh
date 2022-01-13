@@ -5,6 +5,16 @@ if [ "$(id -u)" == "0" ]; then
    exit 1
 fi
 
+# After server creation, from your local client
+# ssh-copy-id root@remote-ip-addr; ssh root@remote-ipaddr; 
+# While remote login;
+# First run new_user.sh script.
+# Log off, re-login using ssh new-user@remote-ip-addr.
+# Then run this run.sh script.
+# It will generate ssh keys if there isn't any, and will then exit.
+# You have to copy the generated public key to your gitlab/github account.
+# Re-run run.sh script to finish installation.
+
 # https://devhints.io/bash For quick bash reference
 # https://usedevbook.com stackoverflow and language documentation searcher.
 
@@ -95,7 +105,7 @@ fi
 # Credentials are for gitlab. And they are only used when
 # cloning private dotfiles_ng repository.
 read -rp "Enter your github/gitlab username: " GITUSERNAME
-# Not using password any more because of ssh keys. You must configure your
+# Not using password any more because of ssh keys.
 # read -rsp "Enter your github/gitlab password: " GITPASSWORD
 echo
 read -rp "Enter your email address: " GITEMAIL
@@ -103,8 +113,9 @@ read -rp "Enter your email address: " GITEMAIL
 if [[ ! -f ~/.ssh/github-id_rsa ]]; then
     echo "Generating key pair for use with github/gitlab..."
     ssh-keygen -t rsa -f ~/.ssh/github-id_rsa -b 4096 -C "$GITEMAIL" -q -P ""
-    echo "Key pair created. Now before continuing,"
-    echo "add the created public key to your gitlab/github account."
+    echo "Key pair created. Script will now exit."
+    echo "Add the created public key to your gitlab/github account."
+    echo "Then re-run the script again."
     exit
 fi
 
@@ -130,21 +141,6 @@ do
         ;;
 esac
 done
-
-# FIXME: If checking for root at the beginning applies, then below is useless
-# Because you'll want to ask this question only when running on a vps with only root user.
-if [[ $SERVER == 1 ]]; then
-    read -rp "Would you like to create a new user with root privileges: (y/n) "
-    if [[ $REPLY =~ ^[Yy]$ ]]
-    then
-        read -rp "Enter new user name: " USRNAME
-        if [[ -n $USRNAME ]]; then
-            sudo useradd -m "$USRNAME" -G sudo --shell /bin/bash
-            sudo passwd "$USRNAME"
-            sudo passwd -l root
-        fi
-    fi
-fi
 
 if [[ $SERVER == 1 ]]; then
     read -rp "What port would you like to use for the ssh server?: " SSHPORT
