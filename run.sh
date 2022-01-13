@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-if [ "$(id -u)" == "0" ]; then
-   echo "This script must not be run as root." 1>&2
-   exit 1
-fi
-
 # After server creation, from your local client
 # ssh-copy-id root@remote-ip-addr; ssh root@remote-ipaddr; 
 # While remote login;
@@ -14,6 +9,11 @@ fi
 # It will generate ssh keys if there isn't any, and will then exit.
 # You have to copy the generated public key to your gitlab/github account.
 # Re-run run.sh script to finish installation.
+
+if [ "$(id -u)" == "0" ]; then
+   echo "This script must not be run as root." 1>&2
+   exit 1
+fi
 
 # https://devhints.io/bash For quick bash reference
 # https://usedevbook.com stackoverflow and language documentation searcher.
@@ -44,7 +44,7 @@ fi
     # vim /etc/default/motd-news:
     # ENABLED=0
 # TODO: https://github.com/meesaltena/SSHHeatmap
-# TODO: Is nginx is installed disabled?
+# TODO: Is nginx installed disabled?
 # TODO: https://github.com/vinceliuice/grub2-themes Use "tela" theme.
 # TODO: disable performance_schema = off for mysql/mariadb
 # TODO: mysql_secure_installation and mysqltuner after the installation.
