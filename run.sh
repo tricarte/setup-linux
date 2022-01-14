@@ -92,6 +92,7 @@ EOS
 
 # Installing prerequisites
 sudo apt install git software-properties-common rsync -y
+git config --global core.sshCommand "ssh -o IdentitiesOnly=yes -i ~/.ssh/github-id_rsa -F /dev/null"
 
 GWIFACE=$(ip route | grep default | cut -d" " -f5)
 IPADDR=$(hostname -I)
