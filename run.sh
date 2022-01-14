@@ -602,6 +602,7 @@ git config --global core.excludesfile ~/.gitignore_global
 
 # Don't require password for these executables.
 echo "$(whoami) ALL=NOPASSWD: /usr/sbin/iftop, /usr/bin/dnstop, /usr/sbin/iotop, /home/$(whoami)/repos/nettop/nettop" | sudo EDITOR='tee -a' visudo
+echo "Defaults:$(whoami) timestamp_timeout=30" | sudo EDITOR='tee -a' visudo
 
 # Install dotfiles (the old way using stow)
 # cd ~ || exit
