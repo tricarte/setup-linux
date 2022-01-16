@@ -171,6 +171,8 @@ then
     exit 1
 fi
 
+start=$SECONDS
+
 if [[ $MACHINE == "server" ]]; then
     echo ""
     read -rp "What port would you like to use for the ssh server?: " SSHPORT
@@ -925,3 +927,6 @@ fi # End of installation of desktop applications
 # So expect changes in .profile and .bashrc
 # Download size is nearly 100M for version 1.53.
 # https://rustup.rs/
+
+end=$SECONDS
+echo "Installation took $((end-start)) seconds to finish."
