@@ -91,6 +91,8 @@ EOS
 #     IdentitiesOnly yes
 
 # Installing prerequisites
+echo "Installing git..."
+echo ""
 sudo apt install git software-properties-common rsync -y
 git config --global core.sshCommand "ssh -o IdentitiesOnly=yes -i ~/.ssh/github-id_rsa -F /dev/null"
 
@@ -165,6 +167,8 @@ PPAS=(
     "ppa:bashtop-monitor/bashtop"
 )
 
+echo "Adding necessary PPAs..."
+echo ""
 for ppa in "${PPAS[@]}"
 do
     sudo add-apt-repository -y "$ppa" -n
@@ -172,6 +176,8 @@ done
 
 sudo apt update -y && sudo apt upgrade -y
 
+echo "Configuring timezone..."
+echo ""
 if [[ $SERVER == 1 ]]; then
     # This may only be necessary in cloud servers.
     echo "Europe/Istanbul" | sudo tee /etc/timezone
@@ -180,6 +186,8 @@ if [[ $SERVER == 1 ]]; then
     sudo dpkg-reconfigure --frontend noninteractive tzdata
 fi
 
+echo "Applying sysctl.conf settings..."
+echo ""
 # sysctl.conf settings
 if [[ $SERVER == 1 ]]; then
     echo "
@@ -319,8 +327,9 @@ vm.vfs_cache_pressure=50
 fi
 
 cd ~ || exit
-sudo apt update -y && sudo apt upgrade -y
 
+echo "Applying ssh server settings..."
+echo ""
 if [[ $SERVER == 1 ]]; then
     if [[ -f /etc/ssh/sshd_config ]]; then
         sudo sed -i -e "s/#Port 22/Port ${SSHPORT}/g" /etc/ssh/sshd_config
@@ -353,6 +362,8 @@ fi
 # sudo mkswap swap_file
 # sudo swapon swap_file
 
+echo "Creating necessary HOME directories..."
+echo ""
 mkdir -p "$HOME/bin"  \
     "$HOME/.local/share/psysh" \
     "$HOME/repos"  \
@@ -375,19 +386,20 @@ mkdir -p "$HOME/bin"  \
 # pv: pipe viewer
 # hey: http load testing - alternative ab (apache benchmark)
 sudo apt install -y python3-pip xsel mtr-tiny pydf \
-  software-properties-common \
   build-essential libssl-dev cmake pkg-config \
   zip unzip autojump highlight par \
   ncdu htop vnstat iftop mosh ranger httpie \
   lnav atool silversearcher-ag lynx multitail \
   shellcheck sqlite3 dnstop libpcap-dev libncurses5-dev \
   libsqlite3-dev autoconf secure-delete \
-  curl stow dnsutils git gawk mediainfo rlwrap ppa-purge \
+  curl stow dnsutils gawk mediainfo rlwrap ppa-purge \
   apache2-utils ntpdate watchman incron hey \
   renameutils libncurses5 mysqltuner gdebi-core mailutils postfix- \
   iotop lshw hwinfo pv libnss3-tools jq chkservice \
   optipng pngquant jpegoptim imagemagick
 
+echo "Configuring ntpdate..."
+echo ""
 if [[ $SERVER == 1 ]]; then
     sudo chmod u+s /usr/sbin/ntpdate
     ntpdate -u ntp.ubuntu.com
@@ -395,6 +407,8 @@ fi
 
 # Install nginx and php 7.4 both from ondrej/ppa
 # This one uses nginx from ondrej.
+echo "Installing Nginx with PHP support..."
+echo ""
 sudo apt install -y nginx libnginx-mod-http-cache-purge php7.4-fpm php7.4-cli \
     php7.4-pgsql php7.4-sqlite3 php7.4-gd \
     php7.4-curl php-memcached \
@@ -425,11 +439,9 @@ sudo apt install -y nginx libnginx-mod-http-cache-purge php7.4-fpm php7.4-cli \
 # sudo add-apt-repository -y ppa:jonathonf/vim-daily
 # This will also install some ruby stuff.
 # +clientserver feature requires X11 so we use this package also in server environments.
+echo "Installing VIM..."
+echo ""
 sudo apt install -y vim-gtk3
-
-if [[ $SERVER == 1 ]]; then
-    sudo apt install -y certbot python3-certbot-nginx
-fi
 
 # sudo update-alternatives --install /usr/bin/editor editor /usr/local/bin/vim 1
 # sudo update-alternatives --set editor /usr/local/bin/vim
@@ -440,6 +452,12 @@ sudo update-alternatives --install /usr/bin/editor editor $VIM 1
 sudo update-alternatives --set editor $VIM
 sudo update-alternatives --install /usr/bin/vi vi $VIM 1
 sudo update-alternatives --set vi $VIM
+
+if [[ $SERVER == 1 ]]; then
+    echo "Installing certbot..."
+    echo ""
+    sudo apt install -y certbot python3-certbot-nginx
+fi
 
 # Build and install tmux
 # sudo apt remove --purge tmux -y
@@ -454,6 +472,8 @@ sudo update-alternatives --set vi $VIM
 # rm -f "$HOME/repos/tmux-$LATEST.tar.gz"
 
 # Or install directly
+echo "Installing tmux..."
+echo ""
 sudo apt install -y tmux
 
 # Install cheat.sh cli client
@@ -510,6 +530,8 @@ cd ~/bin || exit
 # Prefer (below) installing from official repos.
 # wget -O phpunit https://phar.phpunit.de/phpunit-9.phar && chmod +x phpunit
 # ln -s phpunit.phar phpunit
+echo "Installing phpunit..."
+echo ""
 sudo apt install -y phpunit
 
 # Install wp cli admin command.
@@ -518,17 +540,18 @@ wp package install git@github.com:wp-cli/admin-command.git
 
 # Install nodejs lts and npm (npm comes with nodejs)
 # https://github.com/nodesource/distributions/blob/master/README.md#debinstall
-curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-# Above command updates the apt db.
-sudo apt install -y nodejs
-
-# Install yarn.
+echo "Installing NodeJS and yarn..."
+echo ""
 curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/yarnkey.gpg >/dev/null
 echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-sudo apt update -y && sudo apt install yarn -y
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+# Above command updates the apt db.
+sudo apt install -y nodejs yarn
 
 # degit: can install github repositories without its git history.
 # also can download sub directory of a git repo.
+echo "Installing degit..."
+echo ""
 npm install -g degit
 
 # Install fd.
@@ -596,6 +619,8 @@ fi
 yarn global add vim-node-rpc
 
 # Setup .gitconfig.
+echo "Configuring git..."
+echo ""
 git config --global user.name "$GITUSERNAME"
 git config --global user.email "$GITEMAIL"
 git config --global core.editor vim
@@ -619,6 +644,8 @@ echo "Defaults:$(whoami) timestamp_timeout=30" | sudo EDITOR='tee -a' visudo
 
 # Install dotfiles_ng
 # git clone --separate-git-dir="$HOME/.dotfiles" "https://$GITUSERNAME:$GITPASSWORD@gitlab.com/tricarte/dotfiles_ng.git" tmpdotfiles
+echo "Setting up dotfiles..."
+echo ""
 git clone --separate-git-dir="$HOME/.dotfiles" "git@gitlab.com:tricarte/dotfiles_ng.git" tmpdotfiles
 rsync --recursive --verbose --exclude '.git' tmpdotfiles/ "$HOME/"
 rm -r tmpdotfiles
@@ -633,12 +660,16 @@ sed -i -e "s:change_ip:$IPADDR:g" "$HOME/.tmux/resurrect/last"
 tmux kill-session -t test
 
 # Do not list untracked files and directories while "dotfiles status" in $HOME
+echo "Configuring git for dotfiles..."
+echo ""
 git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" config --local status.showUntrackedFiles no
 # Switch from http to ssh for gitlab authentication.
 git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" remote set-url origin git@gitlab.com:tricarte/dotfiles_ng.git
 git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" config core.sshCommand "ssh -o IdentitiesOnly=yes -i ~/.ssh/github-id_rsa -F /dev/null"
 
 # Install Mariadb
+echo "Installing MariaDB..."
+echo ""
 sudo apt install mariadb-server -y
 # 'sudo mysql' drops you into sql shell by default.
 # But you can't do anything admin related.
@@ -722,6 +753,8 @@ query_cache_type=1
 " | sudo tee -a /etc/mysql/mariadb.conf.d/60-server.cnf
 
 # Install tokudb engine for mariadb
+echo "Installing MariaDB Tokudb plugin..."
+echo ""
 sudo apt install -y mariadb-plugin-tokudb
 
 # TODO
@@ -744,15 +777,13 @@ sudo apt install -y mariadb-plugin-tokudb
 # Every day at 03:15 AM.
 # 15 3 * * * /usr/bin/certbot renew >/dev/null 2>&1
 
-# Install bashtop
-# sudo add-apt-repository -y ppa:bashtop-monitor/bashtop
-sudo apt install -y bashtop
-
 # needrestart is inspired by checkrestart which is in debian-goodies package.
-sudo apt install -y needrestart
-# Don't forget to set it to auto in /etc/needrestart/needrestart.conf
+echo "Installing bashtop and needrestart..."
+echo ""
+sudo apt install -y bashtop needrestart
 
-# Set total max journal log size to 100M
+echo "Setting up max journal size..."
+echo ""
 sudo sed -i -e 's/#SystemMaxUse=/SystemMaxUse=100M/g' /etc/systemd/journald.conf
 
 # Install all desktop applications
@@ -774,6 +805,8 @@ if [[ $SERVER == 0 ]]; then
         "ppa:graphics-drivers/ppa"
     )
 
+    echo "Adding necessary PPAs for the desktop..."
+    echo ""
     for ppa in "${PPAS[@]}"
     do
         sudo add-apt-repository -y "$ppa" -n
@@ -786,6 +819,8 @@ if [[ $SERVER == 0 ]]; then
     # dnsmasq: For valet-linux
     # barrier: Synergy alternative
     # appmenu-gtk2-module appmenu-gtk3-module: Global menu in KDE.
+    echo "Installing desktop related apps..."
+    echo ""
     sudo apt install -y \
         adb fastboot \
         appmenu-gtk2-module appmenu-gtk3-module \
@@ -829,12 +864,16 @@ EOT
         sed -i -e "s:change_me:$(whoami):g" "$HOME/.valet/config.json"
 
         # Download adminer to ~/valet-park/adminer
+        echo "Downloading adminer..."
+        echo ""
         [ -d "$HOME/valet-park/adminer" ] || mkdir -p "$HOME/valet-park/adminer"
         cd "$HOME/valet-park/adminer" || exit
         wget -qO index.php "https://www.adminer.org/latest-en.php"
         wget "https://raw.githubusercontent.com/Niyko/Hydra-Dark-Theme-for-Adminer/master/adminer.css"
 
         # Install wpsite
+        echo "Installing wpsite..."
+        echo ""
         git clone "https://github.com/tricarte/wpsite" "$HOME/repos/wpsite"
         git clone "https://github.com/tricarte/wpready3" "$HOME/repos/wpready3"
         chmod +x "$HOME/repos/wpsite/wpsite"
