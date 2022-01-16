@@ -164,7 +164,7 @@ do
 esac
 done
 
-read -p "This machine is a $MACHINE. Proceed installation?  (y/n) (Default n): " -r
+read -p "This machine is a $MACHINE. Proceed installation?  (y/n) (Default n): " -r -n1
 if [[ ! $REPLY =~ ^[Yy]$ ]]
 then
     echo "Installation aborted."
@@ -172,7 +172,12 @@ then
 fi
 
 if [[ $MACHINE == "server" ]]; then
+    echo ""
     read -rp "What port would you like to use for the ssh server?: " SSHPORT
+
+    while [[ "$SSHPORT" -lt 1024 ||  "$SSHPORT" -gt 65535 ]]; do
+        read -p "Enter a port number between 1024 and 65535: " -er SSHPORT
+    done
 fi
 
 # https://gist.github.com/lukechilds/a83e1d7127b78fef38c2914c4ececc3c
@@ -545,6 +550,7 @@ composer g require psy/psysh:@stable
 # repman-io/composer-plugin will provide CDN support for php packages.
 # sudo chown -R "$(whoami):$(whoami)" ~/.composer # This is not necessary.
 composer config --global repo.packagist composer https://packagist.org
+composer config --global allow-plugins.repman-io/composer-plugin true -n
 # composer global require hirak/prestissimo : This is no longer necessary because of composer v2.
 composer global require "squizlabs/php_codesniffer=*" \
 mnapoli/pretty \
