@@ -15,81 +15,6 @@ if [ "$(id -u)" == "0" ]; then
    exit 1
 fi
 
-# https://devhints.io/bash For quick bash reference
-# https://usedevbook.com stackoverflow and language documentation searcher.
-
-# https://gist.githubusercontent.com/BAGELreflex/c04e7a25d64e989cbd9376a9134b8f6d/raw/eea51d63d32dc97ff434a75b192eccaf66609ffb/cdm_fio.sh
-# Copy above fio script to bin and `cdm_fio.sh ./`. Change $LOOP variable. IO Benchmark
-
-# TODO: 7G Firewall now supports nginx. It's a very easy installation.
-# Just take care of accidental multiple inclusion of 7g conf files from both nginx.conf and
-# virtual hosts.
-
-# TODO: https://github.com/lemnos/theme.sh Easily change terminal colors
-
-# I'm using git instead of stow for dotfiles.
-# https://www.anand-iyer.com/blog/2018/a-simpler-way-to-manage-your-dotfiles.html
-
-# SERVER: After configuring ssmtp or msmtp correctly, you do not have to touch php.ini.
-# Because these smtp clients creates symlinks to sendmail which is used by PHP by default.
-
-# TODO: Disable nginx and mariadb if this is a desktop.
-# TODO: dropwatch
-# TODO: https://github.com/rahulunair/repo-peek Tool to browse Github/Gitlab
-# repo using vim.
-# TODO: Change /etc/vnstat.conf interface name using GWIFACE. vnstat auto detects the
-# outgoing interface. This is probably necessary for php-vnstat thing.
-# TODO: apticron thing.
-# TODO: You may consider disabling motd dynamic news. 
-    # vim /etc/default/motd-news:
-    # ENABLED=0
-# TODO: https://github.com/meesaltena/SSHHeatmap
-# TODO: Is nginx installed disabled?
-# TODO: https://github.com/vinceliuice/grub2-themes Use "tela" theme.
-# TODO: disable performance_schema = off for mysql/mariadb
-# TODO: mysql_secure_installation and mysqltuner after the installation.
-# mysql_secure_installation can be scripted in SQL.
-: "
-#!/usr/bin/env bash
-
-mysql -sfu root <<EOS
--- set root password
-UPDATE mysql.user SET Password=PASSWORD('complex_password') WHERE User='root';
--- delete anonymous users
-DELETE FROM mysql.user WHERE User='';
--- delete remote root capabilities
-DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
--- drop database 'test'
-DROP DATABASE IF EXISTS test;
--- also make sure there are lingering permissions to it
-DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
--- make changes immediately
-FLUSH PRIVILEGES;
-EOS
-"
-# TODO: https://github.com/eafer/rdrview Command line html/webpage viewer.
-# TODO: https://github.com/strizhechenko/netutils-linux This may be only useful for
-# real servers. A set of tools for monitoring and tuning the network stack.
-# TODO: https://github.com/skx/sysadmin-util
-# TODO: Consider using shush or cronic instead of cron.
-# TODO: golang can be installed with this script easily.
-# https://github.com/udhos/update-golang
-# TODO: themer.dev: Generate colorschemes for terminal, editors, wallpapers
-# TODO:
-# sudo vim /etc/systemd/journald.conf
-# storage=volatile
-# systemmaxfilesize=50M
-# systemmaxfiles=5
-
-# SSH Host Config Example
-# Put this to .ssh/config
-# Host racknerd
-#     HostName remote-host-ip-address
-#     User userName
-#     Port portNumber
-#     IdentityFile ~/.ssh/private-key-file
-#     IdentitiesOnly yes
-
 GWIFACE=$(ip route | grep default | cut -d" " -f5)
 IPADDR=$(hostname -I)
 
@@ -930,3 +855,79 @@ fi # End of installation of desktop applications
 
 end=$SECONDS
 echo "Installation took $((end-start)) seconds to finish."
+
+# https://devhints.io/bash For quick bash reference
+# https://usedevbook.com stackoverflow and language documentation searcher.
+
+# https://gist.githubusercontent.com/BAGELreflex/c04e7a25d64e989cbd9376a9134b8f6d/raw/eea51d63d32dc97ff434a75b192eccaf66609ffb/cdm_fio.sh
+# Copy above fio script to bin and `cdm_fio.sh ./`. Change $LOOP variable. IO Benchmark
+
+# TODO: 7G Firewall now supports nginx. It's a very easy installation.
+# Just take care of accidental multiple inclusion of 7g conf files from both nginx.conf and
+# virtual hosts.
+
+# TODO: https://github.com/lemnos/theme.sh Easily change terminal colors
+
+# I'm using git instead of stow for dotfiles.
+# https://www.anand-iyer.com/blog/2018/a-simpler-way-to-manage-your-dotfiles.html
+
+# SERVER: After configuring ssmtp or msmtp correctly, you do not have to touch php.ini.
+# Because these smtp clients creates symlinks to sendmail which is used by PHP by default.
+
+# TODO: Disable nginx and mariadb if this is a desktop.
+# TODO: dropwatch
+# TODO: https://github.com/rahulunair/repo-peek Tool to browse Github/Gitlab
+# repo using vim.
+# TODO: Change /etc/vnstat.conf interface name using GWIFACE. vnstat auto detects the
+# outgoing interface. This is probably necessary for php-vnstat thing.
+# TODO: apticron thing.
+# TODO: You may consider disabling motd dynamic news. 
+    # vim /etc/default/motd-news:
+    # ENABLED=0
+# TODO: https://github.com/meesaltena/SSHHeatmap
+# TODO: Is nginx installed disabled?
+# TODO: https://github.com/vinceliuice/grub2-themes Use "tela" theme.
+# TODO: disable performance_schema = off for mysql/mariadb
+# TODO: mysql_secure_installation and mysqltuner after the installation.
+# mysql_secure_installation can be scripted in SQL.
+: "
+#!/usr/bin/env bash
+
+mysql -sfu root <<EOS
+-- set root password
+UPDATE mysql.user SET Password=PASSWORD('complex_password') WHERE User='root';
+-- delete anonymous users
+DELETE FROM mysql.user WHERE User='';
+-- delete remote root capabilities
+DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+-- drop database 'test'
+DROP DATABASE IF EXISTS test;
+-- also make sure there are lingering permissions to it
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+-- make changes immediately
+FLUSH PRIVILEGES;
+EOS
+"
+# TODO: https://github.com/eafer/rdrview Command line html/webpage viewer.
+# TODO: https://github.com/strizhechenko/netutils-linux This may be only useful for
+# real servers. A set of tools for monitoring and tuning the network stack.
+# TODO: https://github.com/skx/sysadmin-util
+# TODO: Consider using shush or cronic instead of cron.
+# TODO: golang can be installed with this script easily.
+# https://github.com/udhos/update-golang
+# TODO: themer.dev: Generate colorschemes for terminal, editors, wallpapers
+# TODO:
+# sudo vim /etc/systemd/journald.conf
+# storage=volatile
+# systemmaxfilesize=50M
+# systemmaxfiles=5
+
+# SSH Host Config Example
+# Put this to .ssh/config
+# Host racknerd
+#     HostName remote-host-ip-address
+#     User userName
+#     Port portNumber
+#     IdentityFile ~/.ssh/private-key-file
+#     IdentitiesOnly yes
+
