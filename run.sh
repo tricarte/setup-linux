@@ -90,12 +90,6 @@ EOS
 #     IdentityFile ~/.ssh/private-key-file
 #     IdentitiesOnly yes
 
-# Installing prerequisites
-echo "Installing git..."
-echo ""
-sudo apt install git software-properties-common rsync -y
-git config --global core.sshCommand "ssh -o IdentitiesOnly=yes -i ~/.ssh/github-id_rsa -F /dev/null"
-
 GWIFACE=$(ip route | grep default | cut -d" " -f5)
 IPADDR=$(hostname -I)
 
@@ -105,12 +99,17 @@ if [[ ! $GWIFACE =~ ^[we] ]]; then
     exit 1
 fi
 
+# Installing prerequisites
+echo "Installing git..."
+echo ""
+sudo apt install git software-properties-common rsync -y
+git config --global core.sshCommand "ssh -o IdentitiesOnly=yes -i ~/.ssh/github-id_rsa -F /dev/null"
+
 # Credentials are for gitlab. And they are only used when
 # cloning private dotfiles_ng repository.
 read -rp "Enter your github/gitlab username: " GITUSERNAME
 # Not using password any more because of ssh keys.
 # read -rsp "Enter your github/gitlab password: " GITPASSWORD
-echo
 read -rp "Enter your email address: " GITEMAIL
 
 if [[ ! -f ~/.ssh/github-id_rsa ]]; then
@@ -124,28 +123,55 @@ fi
 
 # git ls-remote "https://$GITUSERNAME:$GITPASSWORD@gitlab.com/tricarte/dotfiles_ng.git" > /dev/null 2>&1 \
 #     || ( echo "Gitlab credentials are not working. Exiting..."; exit 1; )
-git ls-remote "git@gitlab.com:tricarte/dotfiles_ng.git" > /dev/null 2>&1 \
-    || ( echo "Gitlab credentials are not working. Exiting..."; exit 1; )
+echo "Checking Gitlab credentials..."
+echo ""
+git ls-remote "git@gitlab.com:tricarte/dotfiles_ng.git" > /dev/null 2>&1 || ( echo "Gitlab credentials are not working. Exiting..."; exit 1; )
+echo "Gitlab credentials are working!"
+echo ""
     
+# echo "Is this a server or desktop?"
+# select machine_type in Server Desktop
+# do
+#     case $machine_type in
+#         Server)
+#         SERVER=1
+#         break
+#         ;;
+#         Desktop)
+#         SERVER=0
+#         break
+#         ;;
+#         *)
+#         echo "Select either 1 or 2."
+#         ;;
+# esac
+# done
+
 echo "Is this a server or desktop?"
-select machine in Server Desktop
+select machine_type in Server Desktop
 do
-    case $machine in
+    case $machine_type in
         Server)
-        SERVER=1
+        MACHINE="server"
         break
         ;;
         Desktop)
-        SERVER=0
+        MACHINE="desktop"
         break
-        ;;
-        *)
+        ;; *)
         echo "Select either 1 or 2."
         ;;
 esac
 done
 
-if [[ $SERVER == 1 ]]; then
+read -p "This machine is a $MACHINE. Proceed installation?  (y/n) (Default n): " -r
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    echo "Installation aborted."
+    exit 1
+fi
+
+if [[ $MACHINE == "server" ]]; then
     read -rp "What port would you like to use for the ssh server?: " SSHPORT
 fi
 
@@ -178,7 +204,7 @@ sudo apt update -y && sudo apt upgrade -y
 
 echo "Configuring timezone..."
 echo ""
-if [[ $SERVER == 1 ]]; then
+if [[ $MACHINE == "server" ]]; then
     # This may only be necessary in cloud servers.
     echo "Europe/Istanbul" | sudo tee /etc/timezone
     # Below command didn't reconfigure tzdata but the other one worked:
@@ -186,10 +212,10 @@ if [[ $SERVER == 1 ]]; then
     sudo dpkg-reconfigure --frontend noninteractive tzdata
 fi
 
-echo "Applying sysctl.conf settings..."
-echo ""
 # sysctl.conf settings
-if [[ $SERVER == 1 ]]; then
+if [[ $MACHINE == "server" ]]; then
+    echo "Applying sysctl.conf settings..."
+    echo ""
     echo "
 ################################################################################
 #  http://www.cyberciti.biz/tips/linux-unix-bsd-nginx-webserver-security.html  #
@@ -328,9 +354,9 @@ fi
 
 cd ~ || exit
 
-echo "Applying ssh server settings..."
-echo ""
-if [[ $SERVER == 1 ]]; then
+if [[ $MACHINE == "server" ]]; then
+    echo "Applying ssh server settings..."
+    echo ""
     if [[ -f /etc/ssh/sshd_config ]]; then
         sudo sed -i -e "s/#Port 22/Port ${SSHPORT}/g" /etc/ssh/sshd_config
         # TODO: Other settings:
@@ -345,7 +371,7 @@ fi
 mkdir "$HOME/dotfiles-original"
 cp .bashrc .profile "$HOME/dotfiles-original"
 
-if [[ $SERVER == 1 ]]; then
+if [[ $MACHINE == "server" ]]; then
     # Check these permissions from sshkeygen.io
     # Remember to chmod if you restore your backup keys
     # chmod 0600 $HOME/.ssh/private_key
@@ -398,9 +424,9 @@ sudo apt install -y python3-pip xsel mtr-tiny pydf \
   iotop lshw hwinfo pv libnss3-tools jq chkservice \
   optipng pngquant jpegoptim imagemagick
 
-echo "Configuring ntpdate..."
-echo ""
-if [[ $SERVER == 1 ]]; then
+if [[ $MACHINE == "server" ]]; then
+    echo "Configuring ntpdate..."
+    echo ""
     sudo chmod u+s /usr/sbin/ntpdate
     ntpdate -u ntp.ubuntu.com
 fi
@@ -453,7 +479,7 @@ sudo update-alternatives --set editor $VIM
 sudo update-alternatives --install /usr/bin/vi vi $VIM 1
 sudo update-alternatives --set vi $VIM
 
-if [[ $SERVER == 1 ]]; then
+if [[ $MACHINE == "server" ]]; then
     echo "Installing certbot..."
     echo ""
     sudo apt install -y certbot python3-certbot-nginx
@@ -587,7 +613,7 @@ wget "https://github.com/charmbracelet/glow/releases/download/$LATEST/glow_$( ec
 sudo dpkg -i "glow_$(echo "$LATEST" | tr -d 'v')_linux_amd64.deb"
 
 # Install piknik - clipboard over network
-if [[ $SERVER == 1 ]]; then
+if [[ $MACHINE == "server" ]]; then
     LATEST=$( get_latest_release "jedisct1/piknik" )
     cd ~ || exit
     wget "https://github.com/jedisct1/piknik/releases/download/$LATEST/piknik-linux_x86_64-$( echo "$LATEST" | tr -d 'v' ).tar.gz"
@@ -787,7 +813,7 @@ echo ""
 sudo sed -i -e 's/#SystemMaxUse=/SystemMaxUse=100M/g' /etc/systemd/journald.conf
 
 # Install all desktop applications
-if [[ $SERVER == 0 ]]; then
+if [[ $MACHINE == "desktop" ]]; then
     # TODO: After installation notes:
     # Add below repo URL to Discover after installing plasma-discover-flatpak-backend.
     # https://flathub.org/repo/flathub.flatpakrepo
