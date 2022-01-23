@@ -669,6 +669,7 @@ sudo apt install mariadb-server -y
 # /etc/mysql/mariadb.conf.d/50-server.cnf is the default config file.
 
 # Create a custom mariadb config file
+# https://mariadb.com/kb/en/configuring-mariadb-with-option-files/#server-option-groups
 sudo touch /etc/mysql/mariadb.conf.d/60-server.cnf
 echo "
 [server]
