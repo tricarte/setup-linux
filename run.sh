@@ -763,6 +763,7 @@ if [[ $MACHINE == "desktop" ]]; then
         "ppa:slgobinath/safeeyes"
         "ppa:jonmagon/kdiskmark"
         "ppa:graphics-drivers/ppa"
+        "ppa:libreoffice/ppa"
     )
 
     echo "Adding necessary PPAs for the desktop..."
