@@ -797,7 +797,8 @@ if [[ $MACHINE == "desktop" ]]; then
         simplescreenrecorder \
         sqlitebrowser \
         ubuntu-restricted-addons \
-        filelight
+        filelight \
+        libnotify-bin
 
         composer global require cpriego/valet-linux
         valet install
@@ -813,6 +814,10 @@ php_value[error_log] = syslog
 php_value[post_max_size] = 1000M
 php_value[upload_max_filesize] = 1000M
 php_value[date.timezone] = Europe/Istanbul
+
+env[ADMINER_SERVER] = localhost
+env[ADMINER_USERNAME] = root
+env[ADMINER_PASSWORD] = vagrant
 EOT
 
         # I have to use sudo because sed -i creates temp files in sites-available
