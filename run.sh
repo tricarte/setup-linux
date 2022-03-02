@@ -808,6 +808,7 @@ php_value[max_execution_time] = 3600
 php_value[max_input_time] = 300
 php_value[memory_limit] = 1024M
 php_value[error_reporting] = E_ALL
+php_value[log_errors] = On
 php_value[display_errors] = On
 php_value[display_startup_errors] = On
 php_value[error_log] = syslog
