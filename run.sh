@@ -808,7 +808,7 @@ php_value[max_execution_time] = 3600
 php_value[max_input_time] = 300
 php_value[memory_limit] = 1024M
 php_value[error_reporting] = E_ALL
-php_value[display_erros] = On
+php_value[display_errors] = On
 php_value[display_startup_errors] = On
 php_value[error_log] = syslog
 php_value[post_max_size] = 1000M
@@ -819,12 +819,6 @@ env[ADMINER_SERVER] = localhost
 env[ADMINER_USERNAME] = root
 env[ADMINER_PASSWORD] = vagrant
 
-php_value[memory_limit] =1073741824
-php_value[error_reporting] = E_ALL
-php_value[display_errors] = On
-php_value[display_startup_errors] = On
-php_value[error_log] = /php_errors.log
-php_value[date.timezone] = Europe/Istanbul
 EOT
 
         # I have to use sudo because sed -i creates temp files in sites-available
