@@ -618,6 +618,10 @@ sed -i -e "s:change_iface:$GWIFACE:g" "$HOME/.tmux/resurrect/last"
 sed -i -e "s:change_ip:$IPADDR:g" "$HOME/.tmux/resurrect/last"
 tmux kill-session -t test
 
+# Create ranger bookmarks
+cp "$HOME/dotfiles-templates/ranger/bookmarks" "$HOME/.local/share/ranger/bookmarks"
+sed -i -e "s:change_me:$(whoami):g" "$HOME/.local/share/ranger/bookmarks"
+
 # Do not list untracked files and directories while "dotfiles status" in $HOME
 echo "Configuring git for dotfiles..."
 echo ""
