@@ -804,16 +804,18 @@ if [[ $MACHINE == "desktop" ]]; then
         valet install
 
         cat <<EOT >> /etc/php/7.4/fpm/pool.d/valet.conf
-php_value[max_execution_time] = 3600
-php_value[max_input_time] = 300
-php_value[memory_limit] = 1024M
-php_value[error_reporting] = E_ALL
-php_value[log_errors] = On
+php_value[memory_limit] =1073741824
+;php_value[error_reporting] = 4339
+; Below equals to 'E_ALL'
+php_value[error_reporting] = 32767
 php_value[display_errors] = On
 php_value[display_startup_errors] = On
-php_value[error_log] = syslog
-php_value[post_max_size] = 1000M
-php_value[upload_max_filesize] = 1000M
+php_value[ignore_repeated_errors] = On
+php_value[ignore_repeated_source] = Off
+php_value[log_errors_max_len] = 1024
+php_value[log_errors] = On
+php_value[html_errors] = On
+php_value[error_log] = /tmp/php_error.log
 php_value[date.timezone] = Europe/Istanbul
 
 env[ADMINER_SERVER] = localhost
