@@ -354,7 +354,7 @@ sudo apt install -y python3-pip xsel mtr-tiny pydf \
   apache2-utils ntpdate watchman incron hey \
   renameutils libncurses5 mysqltuner gdebi-core mailutils postfix- \
   iotop lshw hwinfo pv libnss3-tools jq chkservice \
-  optipng pngquant jpegoptim imagemagick golang-go
+  optipng pngquant jpegoptim imagemagick
 
 if [[ $MACHINE == "server" ]]; then
     echo "Configuring ntpdate..."
@@ -858,7 +858,21 @@ EOT
         # Install MailHog
         # Run it as: ~/go/bin/MailHog
         # the HTTP server starts on port 8025
-        go get github.com/mailhog/MailHog
+        # go get github.com/mailhog/MailHog
+        LATEST=$(get_latest_release "mailhog/MailHog")
+        wget -qO "$HOME/bin/MailHog" https://github.com/mailhog/MailHog/releases/download/$LATEST/MailHog_linux_amd64 && \
+            chmod +x "$HOME/bin/MailHog" && sudo mv "$HOME/bin/MailHog" /usr/local/bin/MailHog
+
+        sudo tee /etc/systemd/system/mailhog.service <<EOL
+[Unit]
+Description=MailHog Service
+After=network.service
+[Service]
+Type=simple
+ExecStart=/usr/bin/env /usr/local/bin/MailHog > /dev/null 2>&1 &
+[Install]
+WantedBy=multi-user.target
+EOL
 
 fi # End of installation of desktop applications
 
