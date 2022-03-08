@@ -354,7 +354,7 @@ sudo apt install -y python3-pip xsel mtr-tiny pydf \
   apache2-utils ntpdate watchman incron hey \
   renameutils libncurses5 mysqltuner gdebi-core mailutils postfix- \
   iotop lshw hwinfo pv libnss3-tools jq chkservice \
-  optipng pngquant jpegoptim imagemagick
+  optipng pngquant jpegoptim imagemagick golang-go
 
 if [[ $MACHINE == "server" ]]; then
     echo "Configuring ntpdate..."
@@ -854,6 +854,11 @@ EOT
         ln -s "$HOME/repos/wpsite/wpsite" "$HOME/bin/wpsite"
         ln -s "$HOME/bin/wpsite" "$HOME/bin/wps"
         ln -s "$HOME/repos/wpsite/.wpsite-completion.bash" "$HOME/.wpsite-completion.bash"
+
+        # Install MailHog
+        # Run it as: ~/go/bin/MailHog
+        # the HTTP server starts on port 8025
+        go get github.com/mailhog/MailHog
 
 fi # End of installation of desktop applications
 
