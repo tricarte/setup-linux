@@ -369,12 +369,12 @@ echo "Installing Nginx with PHP support..."
 echo ""
 sudo apt install -y nginx libnginx-mod-http-cache-purge php7.4-fpm php7.4-cli \
     php7.4-pgsql php7.4-sqlite3 php7.4-gd \
-    php7.4-curl php-memcached \
+    php7.4-curl php7.4-memcached \
     php7.4-mysql php7.4-mbstring php7.4-tidy \
     php7.4-xml php7.4-bcmath php7.4-soap \
-    php7.4-intl php7.4-readline php-imagick \
-    php-msgpack php-igbinary php7.4-dev php7.4-zip php7.4-imap \
-    php7.4-gmp php-redis
+    php7.4-intl php7.4-readline php7.4-imagick \
+    php7.4-msgpack php7.4-igbinary php7.4-dev php7.4-zip php7.4-imap \
+    php7.4-gmp php7.4-redis
 
 # Build and install Vim
 # It also has GVIM.
@@ -808,7 +808,10 @@ if [[ $MACHINE == "desktop" ]]; then
         valet install
 
         cat <<EOT >> /etc/php/7.4/fpm/pool.d/valet.conf
+; Memory limit 1G
 php_value[memory_limit] =1073741824
+php_value[post_max_size] =100M
+php_value[upload_max_filesize] =50M
 ;php_value[error_reporting] = 4339
 ; Below equals to 'E_ALL'
 php_value[error_reporting] = 32767
