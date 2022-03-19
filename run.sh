@@ -376,6 +376,9 @@ sudo apt install -y nginx libnginx-mod-http-cache-purge php7.4-fpm php7.4-cli \
     php7.4-msgpack php7.4-igbinary php7.4-dev php7.4-zip php7.4-imap \
     php7.4-gmp php7.4-redis
 
+# https://www.nginx.com/resources/wiki/start/topics/recipes/wordpress/
+sudo sed -i -e 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g' /etc/php/7.4/fpm/php.ini
+
 # Build and install Vim
 # It also has GVIM.
 # sudo apt remove --purge vim vim-common vim-runtime vim-tiny -y
@@ -715,23 +718,6 @@ skip-name-resolve
 # Enable query cache
 query_cache_type=1
 " | sudo tee -a /etc/mysql/mariadb.conf.d/60-server.cnf
-
-# Install tokudb engine for mariadb
-echo "Installing MariaDB Tokudb plugin..."
-echo ""
-sudo apt install -y mariadb-plugin-tokudb
-
-# TODO
-# cat /sys/kernel/mm/transparent_hugepage/enabled
-# Output must be never. To disable transparent_hugepage:
-# vim /etc/default/grub
-# GRUB_CMDLINE_LINUX_DEFAULT="transparent_hugepage=never"
-# sudo update-grub2
-
-# TODO
-# Enable Tokudb using
-# vim /etc/mysql/conf.d/tokudb.cnf
-# plugin-load = ha_tokudb
 
 # TODO
 # SERVER
