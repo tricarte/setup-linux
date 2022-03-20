@@ -352,7 +352,7 @@ sudo apt install -y python3-pip xsel mtr-tiny pydf \
   libsqlite3-dev autoconf secure-delete \
   curl stow dnsutils gawk mediainfo rlwrap ppa-purge \
   apache2-utils ntpdate watchman incron hey \
-  renameutils libncurses5 mysqltuner gdebi-core mailutils postfix- \
+  renameutils libncurses5 gdebi-core mailutils postfix- \
   iotop lshw hwinfo pv libnss3-tools jq chkservice \
   optipng pngquant jpegoptim imagemagick
 
@@ -834,16 +834,6 @@ EOT
         wget -qO index.php "https://www.adminer.org/latest-en.php"
         wget "https://raw.githubusercontent.com/Niyko/Hydra-Dark-Theme-for-Adminer/master/adminer.css"
 
-        # Install wpsite
-        echo "Installing wpsite..."
-        echo ""
-        git clone "https://github.com/tricarte/wpsite" "$HOME/repos/wpsite"
-        git clone "https://github.com/tricarte/wpready3" "$HOME/repos/wpready3"
-        chmod +x "$HOME/repos/wpsite/wpsite"
-        ln -s "$HOME/repos/wpsite/wpsite" "$HOME/bin/wpsite"
-        ln -s "$HOME/bin/wpsite" "$HOME/bin/wps"
-        ln -s "$HOME/repos/wpsite/.wpsite-completion.bash" "$HOME/.wpsite-completion.bash"
-
         # Install MailHog
         # Run it as: ~/go/bin/MailHog
         # the HTTP server starts on port 8025
@@ -864,6 +854,16 @@ WantedBy=multi-user.target
 EOL
 
 fi # End of installation of desktop applications
+
+# Install wpsite
+echo "Installing wpsite..."
+echo ""
+git clone "https://github.com/tricarte/wpsite" "$HOME/repos/wpsite"
+git clone "https://github.com/tricarte/wpready3" "$HOME/repos/wpready3"
+chmod +x "$HOME/repos/wpsite/wpsite"
+ln -s "$HOME/repos/wpsite/wpsite" "$HOME/bin/wpsite"
+ln -s "$HOME/bin/wpsite" "$HOME/bin/wps"
+ln -s "$HOME/repos/wpsite/.wpsite-completion.bash" "$HOME/.wpsite-completion.bash"
 
 # Not that important: A top like tool for Intel GPUs.
 # It can give hints about 3D/Video GPU Utilization, gpu clock speed.
