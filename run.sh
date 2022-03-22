@@ -868,6 +868,13 @@ ln -s "$HOME/repos/wpsite/wpsite" "$HOME/bin/wpsite"
 ln -s "$HOME/bin/wpsite" "$HOME/bin/wps"
 ln -s "$HOME/repos/wpsite/.wpsite-completion.bash" "$HOME/.wpsite-completion.bash"
 
+# Lock root user
+if [[ $MACHINE == "server" ]]; then
+    if [[ 'root' != $(whoami) ]]; then
+        sudo passwd --lock root
+    fi
+fi
+
 # Not that important: A top like tool for Intel GPUs.
 # It can give hints about 3D/Video GPU Utilization, gpu clock speed.
 # sudo apt install -y intel-gpu-tools
