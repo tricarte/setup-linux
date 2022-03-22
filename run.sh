@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 
 # After server creation, from your local client
-# ssh-copy-id root@remote-ip-addr; ssh root@remote-ipaddr; 
+# ssh-copy-id -i identity-file -f root@remote-ip-addr; ssh root@remote-ipaddr; 
 # While remote login;
 # First run new_user.sh script.
 # Log off, re-login using ssh new-user@remote-ip-addr.
+# You have to copy your key to the new user again using ssh-copy-id like below:
+# ssh-copy-id -i identity-file -f new-user@remote-ip-addr;
 # Then run this run.sh script.
 # It will generate ssh keys if there isn't any, and will then exit.
 # You have to copy the generated public key to your gitlab/github account.
 # Re-run run.sh script to finish installation.
+# After the installation, log off and connect using your preferred ssh host config or:
+# ssh new-user@remote-ip-addr -Pnew_port -i ~/.ssh/identity-file
 
 if [ "$(id -u)" == "0" ]; then
    echo "This script must not be run as root." 1>&2
@@ -291,11 +295,10 @@ if [[ $MACHINE == "server" ]]; then
     echo ""
     if [[ -f /etc/ssh/sshd_config ]]; then
         sudo sed -i -e "s/#Port 22/Port ${SSHPORT}/g" /etc/ssh/sshd_config
-        # TODO: Other settings:
-        # AddressFamily inet : to disable IPv6
-        # PubkeyAuthentication yes
-        # PasswordAuthentication no
-        # PermitRootLogin no
+        sudo sed -i -e "s/#AddressFamily any/AddressFamily inet/g" /etc/ssh/sshd_config
+        sudo sed -i -e "s/#PubkeyAuthentication yes/PubkeyAuthentication yes/g" /etc/ssh/sshd_config
+        sudo sed -i -e "s/#PasswordAuthentication yes/PasswordAuthentication no/g" /etc/ssh/sshd_config
+        sudo sed -i -e "s/PermitRootLogin yes/PermitRootLogin no/g" /etc/ssh/sshd_config
         sudo systemctl restart ssh
     fi
 fi
