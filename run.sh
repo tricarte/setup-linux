@@ -288,6 +288,7 @@ vm.vfs_cache_pressure=50
 " | sudo tee -a /etc/sysctl.conf
 fi
 
+
 cd ~ || exit
 
 if [[ $MACHINE == "server" ]]; then
@@ -381,6 +382,39 @@ sudo apt install -y nginx libnginx-mod-http-cache-purge php7.4-fpm php7.4-cli \
 
 # https://www.nginx.com/resources/wiki/start/topics/recipes/wordpress/
 sudo sed -i -e 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g' /etc/php/7.4/fpm/php.ini
+
+if [[ $MACHINE == "server" ]]; then
+    if [[ -f "/etc/php/7.4/fpm/conf.d/10-opcache.ini" ]]; then
+        echo "Applying PHP Opcache settings."
+        echo "
+
+opcache.memory_consumption=128
+
+; Same string in one file can be used for other files to improve memory
+; in MB
+opcache.interned_strings_buffer=32
+
+; Max cached files
+opcache.max_accelerated_files=10000
+
+; You have to manually invalidate cached files if this is 0
+opcache.validate_timestamps=0
+
+; If validate_timestamps is enabled
+opcache.revalidate_freq=60
+
+opcache.fast_shutdown=1
+opcache.enable_cli=1
+opcache.enable_file_override=1
+opcache.save_comments=1
+
+# https://tideways.io/profiler/blog/fine-tune-your-opcache-configuration-to-avoid-caching-suprises
+; opcache.memory_consumption=128 # MB, adjust to your needs
+; opcache.max_accelerated_files=10000 # Adjust to your needs
+opcache.max_wasted_percentage=10 # Adjust to your needs
+" | sudo tee -a /etc/php/7.4/fpm/conf.d/10-opcache.ini
+    fi
+fi
 
 # Build and install Vim
 # It also has GVIM.
