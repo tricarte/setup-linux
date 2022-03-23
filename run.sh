@@ -408,9 +408,7 @@ opcache.enable_cli=1
 opcache.enable_file_override=1
 opcache.save_comments=1
 
-# https://tideways.io/profiler/blog/fine-tune-your-opcache-configuration-to-avoid-caching-suprises
-; opcache.memory_consumption=128 # MB, adjust to your needs
-; opcache.max_accelerated_files=10000 # Adjust to your needs
+; https://tideways.io/profiler/blog/fine-tune-your-opcache-configuration-to-avoid-caching-suprises
 opcache.max_wasted_percentage=10 # Adjust to your needs
 " | sudo tee -a /etc/php/7.4/fpm/conf.d/10-opcache.ini
     fi
