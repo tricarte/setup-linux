@@ -300,6 +300,7 @@ if [[ $MACHINE == "server" ]]; then
         sudo sed -i -e "s/#PubkeyAuthentication yes/PubkeyAuthentication yes/g" /etc/ssh/sshd_config
         sudo sed -i -e "s/#PasswordAuthentication yes/PasswordAuthentication no/g" /etc/ssh/sshd_config
         sudo sed -i -e "s/PermitRootLogin yes/PermitRootLogin no/g" /etc/ssh/sshd_config
+        sudo sed -i -e "s/#UseDNS no/UseDNS no/g" /etc/ssh/sshd_config
         sudo systemctl restart ssh
     fi
 fi
@@ -384,6 +385,14 @@ sudo apt install -y nginx libnginx-mod-http-cache-purge php7.4-fpm php7.4-cli \
 sudo sed -i -e 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g' /etc/php/7.4/fpm/php.ini
 
 if [[ $MACHINE == "server" ]]; then
+# php.ini production settings
+sudo sed -i -e 's/;realpath_cache_ttl = 120/realpath_cache_ttl = 300/g' /etc/php/7.4/fpm/php.ini
+sudo sed -i -e 's/upload_max_filesize = 2M/upload_max_filesize = 50M/g' /etc/php/7.4/fpm/php.ini
+sudo sed -i -e 's/post_max_size = 8M/post_max_size = 55M/g' /etc/php/7.4/fpm/php.ini
+sudo sed -i -e 's/;error_log = syslog/error_log = \/tmp\/php_error.log/g' /etc/php/7.4/fpm/php.ini
+sudo sed -i -e 's/;date.timezone =/date.timezone = Europe\/Istanbul/g' /etc/php/7.4/fpm/php.ini
+
+
     if [[ -f "/etc/php/7.4/fpm/conf.d/10-opcache.ini" ]]; then
         echo "Applying PHP Opcache settings."
         echo "
@@ -937,7 +946,7 @@ echo "Installation took $((end-start)) seconds to finish."
 # https://www.anand-iyer.com/blog/2018/a-simpler-way-to-manage-your-dotfiles.html
 
 # SERVER: After configuring ssmtp or msmtp correctly, you do not have to touch php.ini.
-# Because these smtp clients creates symlinks to sendmail which is used by PHP by default.
+# Because these smtp clients create symlinks to sendmail which is used by PHP by default.
 
 # TODO: Disable nginx and mariadb if this is a desktop.
 # TODO: dropwatch
