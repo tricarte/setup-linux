@@ -680,6 +680,7 @@ git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" config core.sshCommand "ssh
 # Install Mariadb
 echo "Installing MariaDB..."
 echo ""
+sudo apt purge mysql* mariadb* -y
 sudo apt install mariadb-server -y
 # 'sudo mysql' drops you into sql shell by default.
 # But you can't do anything admin related.
