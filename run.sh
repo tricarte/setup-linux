@@ -522,6 +522,7 @@ composer g require psy/psysh:@stable
 
 # Setup composer global packages
 # repman-io/composer-plugin will provide CDN support for php packages.
+# gordalina/cachetool opcache reset tool
 # sudo chown -R "$(whoami):$(whoami)" ~/.composer # This is not necessary.
 composer config --global repo.packagist composer https://packagist.org
 composer config --global allow-plugins.repman-io/composer-plugin true -n
@@ -530,6 +531,7 @@ composer global require "squizlabs/php_codesniffer=*" \
 mnapoli/pretty \
 seld/jsonlint \
 friendsofphp/php-cs-fixer \
+gordalina/cachetool \
 repman-io/composer-plugin
 cd ~/bin || exit
 # Note that this installs a specific version of phpunit.
@@ -915,6 +917,19 @@ if [[ $MACHINE == "server" ]]; then
     if [[ 'root' != $(whoami) ]]; then
         sudo passwd --lock root
     fi
+fi
+
+# Install Config Server Firewall - CSF
+# By default it is not activated.
+if [[ $MACHINE == "server" ]]; then
+    echo "Installing Config Server Fireall - CSF"
+    sudo apt install libwww-perl liblwp-protocol-https-perl libgd-graph-perl -y
+    cd "$HOME/repos" || exit
+    wget -q https://download.configserver.com/csf.tgz
+    tar -xvzf csf.tgz
+    cd csf || exit
+    sudo bash install.sh
+    cd "$HOME" || exit
 fi
 
 # Not that important: A top like tool for Intel GPUs.
