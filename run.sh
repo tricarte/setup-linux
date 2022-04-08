@@ -919,6 +919,19 @@ if [[ $MACHINE == "server" ]]; then
     fi
 fi
 
+# Add current user to www-data group
+# This will be useful when using cli applications
+# such as composer, wpcli with www-data owned files and directories.
+if [[ $MACHINE == "server" ]]; then
+    if [[ 'root' != $(whoami) ]]; then
+        # Check www-data group exists
+        getent group www-data > /dev/null 2>&1 
+        if [[ ! $? ]]; then
+            sudo usermod -aG www-data $(whoami)
+        fi
+    fi
+fi
+
 # Install Config Server Firewall - CSF
 # By default it is not activated.
 if [[ $MACHINE == "server" ]]; then
