@@ -407,10 +407,11 @@ opcache.interned_strings_buffer=32
 opcache.max_accelerated_files=10000
 
 ; You have to manually invalidate cached files if this is 0
-opcache.validate_timestamps=0
+opcache.validate_timestamps=1
 
 ; If validate_timestamps is enabled
 opcache.revalidate_freq=60
+opcache.revalidate_path=0
 
 opcache.fast_shutdown=1
 opcache.enable_cli=1
