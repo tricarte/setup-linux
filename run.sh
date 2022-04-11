@@ -908,6 +908,15 @@ echo "Installing wpsite..."
 echo ""
 git clone "https://github.com/tricarte/wpsite" "$HOME/repos/wpsite"
 git clone "https://github.com/tricarte/wpready3" "$HOME/repos/wpready3"
+
+# Add post-commit hook to run 'composer wpstarter'
+echo "
+#!/usr/bin/env bash
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+composer wpstarter
+" | tee "$HOME/repos/wpready3/.git/hooks/post-commit"
+chmod +x "$HOME/repos/wpready3/.git/hooks/post-commit"
+
 chmod +x "$HOME/repos/wpsite/wpsite"
 ln -s "$HOME/repos/wpsite/wpsite" "$HOME/bin/wpsite"
 ln -s "$HOME/bin/wpsite" "$HOME/bin/wps"
