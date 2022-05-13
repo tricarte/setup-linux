@@ -912,7 +912,7 @@ git clone "https://github.com/tricarte/wpready3" "$HOME/repos/wpready3"
 
 # Add post-commit hook to run 'composer wpstarter'
 echo "!/usr/bin/env bash
-export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+export PATH=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin\"
 composer wpstarter" > "$HOME/repos/wpready3/.git/hooks/post-commit"
 chmod +x "$HOME/repos/wpready3/.git/hooks/post-commit"
 
