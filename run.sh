@@ -547,6 +547,9 @@ sudo apt install -y phpunit
 # This allows you to open site in your browser.
 wp package install git@github.com:wp-cli/admin-command.git
 
+# Install wp cli secure command.
+wp package install git@github.com:igorhrcek/wp-cli-secure-command.git
+
 # Install nodejs lts and npm (npm comes with nodejs)
 # https://github.com/nodesource/distributions/blob/master/README.md#debinstall
 echo "Installing NodeJS and yarn..."
@@ -865,8 +868,6 @@ env[ADMINER_PASSWORD] = vagrant
 
 EOT
 
-        # I have to use sudo because sed -i creates temp files in sites-available
-        # so I need root privileges.
         sudo sed -i -e "/charset.*/a client_max_body_size 1500M;" /etc/nginx/sites-available/valet.conf
 
         # Create valet config from template
@@ -910,11 +911,9 @@ git clone "https://github.com/tricarte/wpsite" "$HOME/repos/wpsite"
 git clone "https://github.com/tricarte/wpready3" "$HOME/repos/wpready3"
 
 # Add post-commit hook to run 'composer wpstarter'
-echo "
-#!/usr/bin/env bash
+echo "!/usr/bin/env bash
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
-composer wpstarter
-" | tee "$HOME/repos/wpready3/.git/hooks/post-commit"
+composer wpstarter" > "$HOME/repos/wpready3/.git/hooks/post-commit"
 chmod +x "$HOME/repos/wpready3/.git/hooks/post-commit"
 
 chmod +x "$HOME/repos/wpsite/wpsite"
@@ -937,7 +936,7 @@ if [[ $MACHINE == "server" ]]; then
         # Check www-data group exists
         getent group www-data > /dev/null 2>&1 
         if [[ ! $? ]]; then
-            sudo usermod -aG www-data $(whoami)
+            sudo usermod -aG www-data "$(whoami)"
         fi
     fi
 fi
