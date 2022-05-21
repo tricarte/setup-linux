@@ -36,10 +36,20 @@ git config --global core.sshCommand "ssh -o IdentitiesOnly=yes -i ~/.ssh/github-
 
 # Credentials are for gitlab. And they are only used when
 # cloning private dotfiles_ng repository.
-read -rp "Enter your github/gitlab username: " GITUSERNAME
-# Not using password any more because of ssh keys.
-# read -rsp "Enter your github/gitlab password: " GITPASSWORD
-read -rp "Enter your email address: " GITEMAIL
+while : ; do
+    read -rp "Enter your github/gitlab username: " GITUSERNAME
+    # Not using password any more because of ssh keys.
+    # read -rsp "Enter your github/gitlab password: " GITPASSWORD
+    read -rp "Enter your email address: " GITEMAIL
+    echo ""
+    echo "Gitlab/Github username: $GITUSERNAME"
+    echo "Email: $GITEMAIL"
+
+    echo ""
+    read -p "Are these values correct?  (y/n): " -r
+    echo ""
+    [[ ! $REPLY =~ ^[Yy]$ ]] || break
+done
 
 if [[ ! -f ~/.ssh/github-id_rsa ]]; then
     echo "Generating key pair for use with github/gitlab..."
