@@ -424,6 +424,17 @@ opcache.max_wasted_percentage=10 # Adjust to your needs
     fi
 fi
 
+# Create separate user with non login shell to be the owner of /var/www
+if [[ $MACHINE == "server" ]]; then
+    sudo adduser webu --shell=/bin/false --disabled-login --disabled-password --gecos ""
+    if [[ -d /var/www ]]; then
+        sudo chown webu:webu /var/www
+    fi
+    sudo -u webu git config --global user.name "$GITUSERNAME"
+    sudo -u webu git config --global user.email "$GITEMAIL"
+    sudo -u webu git config --global core.editor vim
+fi
+
 # Build and install Vim
 # It also has GVIM.
 # sudo apt remove --purge vim vim-common vim-runtime vim-tiny -y
@@ -938,6 +949,16 @@ if [[ $MACHINE == "server" ]]; then
         if [[ ! $? ]]; then
             sudo usermod -aG www-data "$(whoami)"
         fi
+
+        # Also be a member of "webu" group.
+        # This is the group name of the owner of /var/www directory.
+        getent group webu > /dev/null 2>&1 
+        if [[ ! $? ]]; then
+            sudo usermod -aG webu "$(whoami)"
+        fi
+
+        # Apply group membership changes
+        su - $USER
     fi
 fi
 
