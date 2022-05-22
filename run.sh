@@ -371,6 +371,8 @@ sudo apt install -y python3-pip xsel mtr-tiny pydf \
   iotop lshw hwinfo pv libnss3-tools jq chkservice \
   optipng pngquant jpegoptim imagemagick
 
+pip install --user tmuxp
+
 if [[ $MACHINE == "server" ]]; then
     echo "Configuring ntpdate..."
     echo ""
@@ -686,11 +688,23 @@ rm -r tmpdotfiles
 # shellcheck source=/dev/null
 source "$HOME/.bashrc"
 
-tmux new-session -d -s test && mkdir "$HOME/.tmux/resurrect" && cp "$HOME/resurrect_last" "$HOME/.tmux/resurrect/last"
-sed -i -e "s:change_me:$(whoami):g" "$HOME/.tmux/resurrect/last"
-sed -i -e "s:change_iface:$GWIFACE:g" "$HOME/.tmux/resurrect/last"
-sed -i -e "s:change_ip:$IPADDR:g" "$HOME/.tmux/resurrect/last"
-tmux kill-session -t test
+# Now using tmuxp for building tmux sessions from config files
+# tmux new-session -d -s test && mkdir "$HOME/.tmux/resurrect" && cp "$HOME/resurrect_last" "$HOME/.tmux/resurrect/last"
+# sed -i -e "s:change_me:$(whoami):g" "$HOME/.tmux/resurrect/last"
+# sed -i -e "s:change_iface:$GWIFACE:g" "$HOME/.tmux/resurrect/last"
+# sed -i -e "s:change_ip:$IPADDR:g" "$HOME/.tmux/resurrect/last"
+# tmux kill-session -t test
+
+# Copy tmuxp config from dotfiles-templates to ~/.tmuxp/
+if [[ ! -d "$HOME/.tmuxp" ]]; then
+    mkdir "$HOME/.tmuxp"
+fi
+
+cp "$HOME/dotfiles-templates/tmuxp/mytmux.yaml" "$HOME/.tmuxp"
+sed -i -e "s:change_iface:$GWIFACE:g" "$HOME/.tmuxp/mytmux.yaml"
+sed -i -e "s:change_ip:$IPADDR:g" "$HOME/.tmuxp/mytmux.yaml"
+# Now we can create a new tmux session based on mytmux.yaml file
+# using: tmuxp load mytmux
 
 # Create ranger bookmarks
 cp "$HOME/dotfiles-templates/ranger/bookmarks" "$HOME/.local/share/ranger/bookmarks"
