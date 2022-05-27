@@ -952,8 +952,9 @@ composer wpstarter" > "$HOME/repos/wpready3/.git/hooks/post-commit"
 chmod +x "$HOME/repos/wpready3/.git/hooks/post-commit"
 
 chmod +x "$HOME/repos/wpsite/wpsite"
-ln -s "$HOME/repos/wpsite/wpsite" "$HOME/bin/wpsite"
-ln -s "$HOME/bin/wpsite" "$HOME/bin/wps"
+# ln -s "$HOME/repos/wpsite/wpsite" "$HOME/bin/wpsite"
+sudo ln -s "$HOME/repos/wpsite/wpsite" "/usr/local/bin/wpsite"
+sudo ln -s "$HOME/repos/wpsite/wpsite" "/usr/local/bin/wps"
 ln -s "$HOME/repos/wpsite/.wpsite-completion.bash" "$HOME/.wpsite-completion.bash"
 
 # Lock root user
