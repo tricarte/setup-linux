@@ -67,6 +67,13 @@ echo ""
 git ls-remote "git@gitlab.com:tricarte/dotfiles_ng.git" > /dev/null 2>&1 || ( echo "Gitlab credentials are not working. Exiting..."; exit 1; )
 echo "Gitlab credentials are working!"
 echo ""
+
+read -rp "Enter your github access token: " GHTOKEN
+
+if curl -H "Authorization: token ${GHTOKEN}" --silent "https://api.github.com" | grep -q "Bad credentials"; then
+    echo "Your github access token is not valid!"
+    exit 1
+fi
     
 # echo "Is this a server or desktop?"
 # select machine_type in Server Desktop
@@ -119,24 +126,40 @@ if [[ $MACHINE == "server" ]]; then
     while [[ "$SSHPORT" -lt 1024 ||  "$SSHPORT" -gt 65535 ]]; do
         read -p "Enter a port number between 1024 and 65535: " -er SSHPORT
     done
+
+    while : ; do
+        echo ""
+        echo "Specify MariaDB 'admin' user password: "
+        read -s DBPASSWORD
+
+        echo "Reenter MariaDB 'admin' user password: "
+        read -s DBPASSWORDCHK
+
+        if [[ $DBPASSWORD == $DBPASSWORDCHK ]]; then
+            break
+        else
+            echo ""
+            echo "Passwords do not match."
+        fi
+    done
 fi
 
 # https://gist.github.com/lukechilds/a83e1d7127b78fef38c2914c4ececc3c
 # Get the latest release version number of a github project.
 get_latest_release() {
-    curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
-        grep '"tag_name":' |                                            # Get tag line
-        sed -E 's/.*"([^"]+)".*/\1/'                                    # Pluck JSON value
+    curl -H "Authorization: token ${GHTOKEN}" --silent \
+        "https://api.github.com/repos/$1/releases/latest" \
+        | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'                        
     }
 
 ##################
 #  List of PPAs  #
 ##################
+# "ppa:ondrej/php"
+# Ubuntu 22.04 comes with PHP 8.1
 PPAS=(
-    "ppa:ondrej/php"
     "ppa:ondrej/nginx"
     "ppa:jonathonf/vim-daily"
-    "ppa:bashtop-monitor/bashtop"
 )
 
 echo "Adding necessary PPAs..."
@@ -380,32 +403,51 @@ if [[ $MACHINE == "server" ]]; then
     ntpdate -u ntp.ubuntu.com
 fi
 
-# Install nginx and php 7.4 both from ondrej/ppa
+# Install nginx ondrej PPA and PHP from official repos
 # This one uses nginx from ondrej.
 echo "Installing Nginx with PHP support..."
 echo ""
-sudo apt install -y nginx libnginx-mod-http-cache-purge php7.4-fpm php7.4-cli \
-    php7.4-pgsql php7.4-sqlite3 php7.4-gd \
-    php7.4-curl php7.4-memcached \
-    php7.4-mysql php7.4-mbstring php7.4-tidy \
-    php7.4-xml php7.4-bcmath php7.4-soap \
-    php7.4-intl php7.4-readline php7.4-imagick \
-    php7.4-msgpack php7.4-igbinary php7.4-dev php7.4-zip php7.4-imap \
-    php7.4-gmp php7.4-redis php7.4-apcu
+sudo apt install -y nginx libnginx-mod-http-cache-purge php-fpm php-cli \
+    php-pgsql php-sqlite3 php-gd \
+    php-curl php-memcached \
+    php-mysql php-mbstring php-tidy \
+    php-xml php-bcmath php-soap \
+    php-intl php-readline php-imagick \
+    php-msgpack php-igbinary php-dev php-zip php-imap \
+    php-gmp php-redis php-apcu
+
+# Find out
+# grep -m1 -> return only one match
+# For a PHP 7.4 installation, output will be "/run/php/php7.4-fpm.sock"
+default_fpm=$(
+    update-alternatives --quiet --query php-fpm.sock \
+        | grep Value -m1 | cut -d" " -f2
+    )
+
+
+phpfpmversion=$(
+    dpkg -s php-fpm | grep -m1 "Depends:" | cut -d" " -f2 | cut -c4-6
+)
 
 # https://www.nginx.com/resources/wiki/start/topics/recipes/wordpress/
-sudo sed -i -e 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g' /etc/php/7.4/fpm/php.ini
+if [[ -f "/etc/php/${phpfpmversion}/fpm/php.ini" ]]; then
+    sudo sed -i -e 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g' "/etc/php/${phpfpmversion}/fpm/php.ini"
+fi
 
 if [[ $MACHINE == "server" ]]; then
 # php.ini production settings
-sudo sed -i -e 's/;realpath_cache_ttl = 120/realpath_cache_ttl = 300/g' /etc/php/7.4/fpm/php.ini
-sudo sed -i -e 's/upload_max_filesize = 2M/upload_max_filesize = 50M/g' /etc/php/7.4/fpm/php.ini
-sudo sed -i -e 's/post_max_size = 8M/post_max_size = 55M/g' /etc/php/7.4/fpm/php.ini
-sudo sed -i -e 's/;error_log = syslog/error_log = \/tmp\/php_error.log/g' /etc/php/7.4/fpm/php.ini
-sudo sed -i -e 's/;date.timezone =/date.timezone = Europe\/Istanbul/g' /etc/php/7.4/fpm/php.ini
+sudo sed -i -e 's/;realpath_cache_ttl = 120/realpath_cache_ttl = 300/g' "/etc/php/${phpfpmversion}/fpm/php.ini"
+sudo sed -i -e 's/upload_max_filesize = 2M/upload_max_filesize = 50M/g' "/etc/php/${phpfpmversion}/fpm/php.ini"
+sudo sed -i -e 's/post_max_size = 8M/post_max_size = 55M/g' "/etc/php/${phpfpmversion}/fpm/php.ini"
+sudo sed -i -e 's/;error_log = syslog/error_log = \/tmp\/php_error.log/g' "/etc/php/${phpfpmversion}/fpm/php.ini"
+sudo sed -i -e 's/;date.timezone =/date.timezone = Europe\/Istanbul/g' "/etc/php/${phpfpmversion}/fpm/php.ini"
 
 
-    if [[ -f "/etc/php/7.4/fpm/conf.d/10-opcache.ini" ]]; then
+    if [[ ! -f "/etc/php/${phpfpmversion}/fpm/conf.d/10-opcache.ini" ]]; then
+        sudo phpenmod -v "$phpfpmversion" -s fpm opcache
+    fi
+
+    if [[ -f "/etc/php/${phpfpmversion}/fpm/conf.d/10-opcache.ini" ]]; then
         echo "Applying PHP Opcache settings."
         echo "
 
@@ -432,7 +474,7 @@ opcache.save_comments=1
 
 ; https://tideways.io/profiler/blog/fine-tune-your-opcache-configuration-to-avoid-caching-suprises
 opcache.max_wasted_percentage=10 # Adjust to your needs
-" | sudo tee -a /etc/php/7.4/fpm/conf.d/10-opcache.ini
+" | sudo tee -a "/etc/php/${phpfpmversion}/fpm/conf.d/10-opcache.ini"
     fi
 fi
 
@@ -541,16 +583,16 @@ chmod +x wp-cli.phar && sudo mv wp-cli.phar /usr/local/bin/wp
 # Install composer
 php -r "readfile('http://getcomposer.org/installer');" | sudo php -- --install-dir=/usr/bin/ --filename=composer
 
+composer config -g github-oauth.github.com "$GHTOKEN"
+composer config --global repo.packagist composer https://packagist.org
+composer config --global allow-plugins.repman-io/composer-plugin true -n
+
 # Install psysh: PHP Repl
 composer g require psy/psysh:@stable
 
 # Setup composer global packages
 # repman-io/composer-plugin will provide CDN support for php packages.
 # gordalina/cachetool opcache reset tool
-# sudo chown -R "$(whoami):$(whoami)" ~/.composer # This is not necessary.
-composer config --global repo.packagist composer https://packagist.org
-composer config --global allow-plugins.repman-io/composer-plugin true -n
-# composer global require hirak/prestissimo : This is no longer necessary because of composer v2.
 composer global require "squizlabs/php_codesniffer=*" \
 mnapoli/pretty \
 seld/jsonlint \
@@ -728,10 +770,16 @@ sudo apt install mariadb-server -y
 
 # It is recommended that you would better not touch the root authentication method
 # which is based on unix_socket. Creating another admin user is a better idea.
-# TODO: Script below...
 # sudo mariadb
 # GRANT ALL ON *.* TO 'admin'@'localhost' IDENTIFIED BY 'password' WITH GRANT OPTION;
 # FLUSH PRIVILEGES;
+if [[ $MACHINE == "server" ]]; then
+    sudo mariadb -e"GRANT ALL ON *.* TO 'admin'@'localhost' \
+        IDENTIFIED BY '${DBPASSWORD}' WITH GRANT OPTION; FLUSH PRIVILEGES;"
+else
+    sudo mariadb -e"GRANT ALL ON *.* TO 'admin'@'localhost' \
+        IDENTIFIED BY 'password' WITH GRANT OPTION; FLUSH PRIVILEGES;"
+fi
 
 # Check current authentication plugin:
 # Try logging in using `sudo mysql` if unix_socket plugin is active.
@@ -825,16 +873,16 @@ sudo sed -i -e 's/#SystemMaxUse=/SystemMaxUse=100M/g' /etc/systemd/journald.conf
 # Install all desktop applications
 if [[ $MACHINE == "desktop" ]]; then
     # TODO: After installation notes:
-    # Add below repo URL to Discover after installing plasma-discover-flatpak-backend.
+    # Add below repo URL to Discover after installing plasma-discover-backend-flatpak.
     # https://flathub.org/repo/flathub.flatpakrepo
 
 # ppa:graphics-drivers/ppa : Latest NVIDIA drivers
+# ppa:maarten-baert/simplescreenrecorder" # This PPA does not exist for 2204
 # ppa:kisak/kisak-mesa: Latest stable Mesa drivers
     PPAS=(
-        "ppa:maarten-baert/simplescreenrecorder"
         "ppa:kisak/kisak-mesa"
         "ppa:mkusb/ppa"
-        "ppa:ubuntuhandbook1/gimp"
+        "ppa:savoury1/gimp"
         "ppa:kdenlive/kdenlive-stable"
         "ppa:slgobinath/safeeyes"
         "ppa:jonmagon/kdiskmark"
@@ -868,7 +916,7 @@ if [[ $MACHINE == "desktop" ]]; then
         glmark2 \
         kdenlive \
         mkusb mkusb-nox usb-pack-efi \
-        plasma-discover-flatpak-backend \
+        plasma-discover-backend-flatpak \
         safeeyes \
         simplescreenrecorder \
         sqlitebrowser \
@@ -877,9 +925,9 @@ if [[ $MACHINE == "desktop" ]]; then
         libnotify-bin
 
         composer global require cpriego/valet-linux
-        valet install
+        "$HOME/.composer/vendor/bin/valet" install
 
-        cat <<EOT >> /etc/php/7.4/fpm/pool.d/valet.conf
+        cat <<EOT >> "/etc/php/${phpfpmversion}/fpm/pool.d/valet.conf"
 ; Memory limit 1G
 php_value[memory_limit] =1073741824
 php_value[post_max_size] =100M
@@ -903,7 +951,11 @@ env[ADMINER_PASSWORD] = vagrant
 
 EOT
 
-        sudo sed -i -e "/charset.*/a client_max_body_size 1500M;" /etc/nginx/sites-available/valet.conf
+        if [[ -f /etc/nginx/sites-available/valet.conf ]]; then
+            if ! grep -q client_max_body_size /etc/nginx/sites-available/valet.conf; then
+                sudo sed -i -e "/charset.*/a client_max_body_size 1500M;" /etc/nginx/sites-available/valet.conf
+            fi
+        fi
 
         # Create valet config from template
         mv "$HOME/.valet/config.json" "$HOME/.valet/config.json.orj"
