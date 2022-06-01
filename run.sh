@@ -946,8 +946,8 @@ php_value[error_log] = /tmp/php_error.log
 php_value[date.timezone] = Europe/Istanbul
 
 env[ADMINER_SERVER] = localhost
-env[ADMINER_USERNAME] = root
-env[ADMINER_PASSWORD] = vagrant
+env[ADMINER_USERNAME] = admin
+env[ADMINER_PASSWORD] = password
 
 EOT
 
