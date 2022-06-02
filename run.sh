@@ -924,52 +924,6 @@ if [[ $MACHINE == "desktop" ]]; then
         filelight \
         libnotify-bin
 
-        composer global require cpriego/valet-linux
-        "$HOME/.composer/vendor/bin/valet" install
-
-        cat <<EOT >> "/etc/php/${phpfpmversion}/fpm/pool.d/valet.conf"
-; Memory limit 1G
-php_value[memory_limit] =1073741824
-php_value[post_max_size] =100M
-php_value[upload_max_filesize] =50M
-;php_value[error_reporting] = 4339
-; Below equals to 'E_ALL'
-php_value[error_reporting] = 32767
-php_value[display_errors] = On
-php_value[display_startup_errors] = On
-php_value[ignore_repeated_errors] = On
-php_value[ignore_repeated_source] = Off
-php_value[log_errors_max_len] = 1024
-php_value[log_errors] = On
-php_value[html_errors] = On
-php_value[error_log] = /tmp/php_error.log
-php_value[date.timezone] = Europe/Istanbul
-
-env[ADMINER_SERVER] = localhost
-env[ADMINER_USERNAME] = admin
-env[ADMINER_PASSWORD] = password
-
-EOT
-
-        if [[ -f /etc/nginx/sites-available/valet.conf ]]; then
-            if ! grep -q client_max_body_size /etc/nginx/sites-available/valet.conf; then
-                sudo sed -i -e "/charset.*/a client_max_body_size 1500M;" /etc/nginx/sites-available/valet.conf
-            fi
-        fi
-
-        # Create valet config from template
-        mv "$HOME/.valet/config.json" "$HOME/.valet/config.json.orj"
-        cp "$HOME/dotfiles-templates/valet/config.json" "$HOME/.valet/config.json"
-        sed -i -e "s:change_me:$(whoami):g" "$HOME/.valet/config.json"
-
-        # Download adminer to ~/valet-park/adminer
-        echo "Downloading adminer..."
-        echo ""
-        [ -d "$HOME/valet-park/adminer" ] || mkdir -p "$HOME/valet-park/adminer"
-        cd "$HOME/valet-park/adminer" || exit
-        wget -qO index.php "https://www.adminer.org/latest-en.php"
-        wget "https://raw.githubusercontent.com/Niyko/Hydra-Dark-Theme-for-Adminer/master/adminer.css"
-
         # Install MailHog
         # Run it as: ~/go/bin/MailHog
         # the HTTP server starts on port 8025
@@ -1062,6 +1016,71 @@ fi
 # So expect changes in .profile and .bashrc
 # Download size is nearly 100M for version 1.53.
 # https://rustup.rs/
+
+# Install valet-linux
+if [[ $MACHINE == "desktop" ]]; then
+
+    # valet-linux installation may break name resolution
+    # So we first install adminer from internet.
+    echo "Downloading adminer..."
+    echo ""
+    [ -d "$HOME/valet-park/adminer" ] || mkdir -p "$HOME/valet-park/adminer"
+    cd "$HOME/valet-park/adminer" || exit
+    wget -qO index.php "https://www.adminer.org/latest-en.php"
+    wget "https://raw.githubusercontent.com/Niyko/Hydra-Dark-Theme-for-Adminer/master/adminer.css"
+    cd ~ || exit
+
+    composer global require cpriego/valet-linux
+    "$HOME/.composer/vendor/bin/valet" install
+
+    cat <<EOT >> "/etc/php/${phpfpmversion}/fpm/pool.d/valet.conf"
+; Memory limit 1G
+php_value[memory_limit] =1073741824
+php_value[post_max_size] =100M
+php_value[upload_max_filesize] =50M
+;php_value[error_reporting] = 4339
+; Below equals to 'E_ALL'
+php_value[error_reporting] = 32767
+php_value[display_errors] = On
+php_value[display_startup_errors] = On
+php_value[ignore_repeated_errors] = On
+php_value[ignore_repeated_source] = Off
+php_value[log_errors_max_len] = 1024
+php_value[log_errors] = On
+php_value[html_errors] = On
+php_value[error_log] = /tmp/php_error.log
+php_value[date.timezone] = Europe/Istanbul
+
+env[ADMINER_SERVER] = localhost
+env[ADMINER_USERNAME] = admin
+env[ADMINER_PASSWORD] = password
+
+EOT
+
+    if [[ -f /etc/nginx/sites-available/valet.conf ]]; then
+        if ! grep -q client_max_body_size /etc/nginx/sites-available/valet.conf; then
+            sudo sed -i -e "/charset.*/a client_max_body_size 1500M;" /etc/nginx/sites-available/valet.conf
+            sudo sed -i -e "/default_server;$/c\    localhost 80 default_server;" /etc/nginx/sites-available/valet.conf
+        fi
+    fi
+
+    if [[ -f /etc/dnsmasq.d/valet ]]; then
+        echo "address=/.test/127.0.0.1" | sudo tee /etc/dnsmasq.d/valet
+    fi
+
+    echo "server=9.9.9.9" | sudo tee /etc/dnsmasq.d/server
+
+    sudo systemctl restart dnsmasq.service
+
+    # Create valet config from template
+    mv "$HOME/.valet/config.json" "$HOME/.valet/config.json.orj"
+    cp "$HOME/dotfiles-templates/valet/config.json" "$HOME/.valet/config.json"
+    sed -i -e "s:change_me:$(whoami):g" "$HOME/.valet/config.json"
+
+    if ! ping -c1 google.com > /dev/null 2>&1; then
+        echo "Name resolution is broken."
+    fi
+fi
 
 end=$SECONDS
 echo "Installation took $((end-start)) seconds to finish."
