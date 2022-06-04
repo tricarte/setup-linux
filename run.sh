@@ -557,8 +557,8 @@ curl https://cht.sh/:cht.sh > "$HOME/bin/cht.sh" && chmod +x "$HOME/bin/cht.sh"
 
 # Install tealdeer: tldr rust implementation
 LATEST=$(get_latest_release "dbrgn/tealdeer")
-wget -qO "$HOME/bin/tldr" "https://github.com/dbrgn/tealdeer/releases/download/$LATEST/tldr-linux-x86_64-musl" && \
-    chmod +x "$HOME/bin/tldr" && tldr --update
+wget -qO "$HOME/bin/tldr" "https://github.com/dbrgn/tealdeer/releases/download/$LATEST/tealdeer-linux-x86_64-musl" && \
+    chmod +x "$HOME/bin/tldr"
 
 # nettop: bandwidth usage by process
 git clone "https://github.com/Emanem/nettop.git" "$HOME/repos/nettop" && \
