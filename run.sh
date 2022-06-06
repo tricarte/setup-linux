@@ -416,17 +416,20 @@ sudo apt install -y nginx libnginx-mod-http-cache-purge php-fpm php-cli \
     php-msgpack php-igbinary php-dev php-zip php-imap \
     php-gmp php-redis php-apcu
 
-# Find out
-# grep -m1 -> return only one match
-# For a PHP 7.4 installation, output will be "/run/php/php7.4-fpm.sock"
-default_fpm=$(
-    update-alternatives --quiet --query php-fpm.sock \
-        | grep Value -m1 | cut -d" " -f2
-    )
+# PHP 7.4 packages
+# sudo apt install \
+#     php7.4-{fpm,cli,pgsql,sqlite3,gd,curl,memcached,mysql,mbstring,tidy,\
+# xml,bcmath,soap,intl,readline,imagick,msgpack,igbinary,dev,zip,imap,\
+# gmp,redis,apcu}
 
+# If you first install valet with a recent version of PHP
+# Then switching back to an older PHP version breaks valet.
+# valet use 7.4
+# value use 8.1
+# valet use default
 
 phpfpmversion=$(
-    dpkg -s php-fpm | grep -m1 "Depends:" | cut -d" " -f2 | cut -c4-6
+    php -r "printf('%d.%d', PHP_MAJOR_VERSION, PHP_MINOR_VERSION);"
 )
 
 # https://www.nginx.com/resources/wiki/start/topics/recipes/wordpress/
@@ -435,13 +438,14 @@ if [[ -f "/etc/php/${phpfpmversion}/fpm/php.ini" ]]; then
 fi
 
 if [[ $MACHINE == "server" ]]; then
-# php.ini production settings
-sudo sed -i -e 's/;realpath_cache_ttl = 120/realpath_cache_ttl = 300/g' "/etc/php/${phpfpmversion}/fpm/php.ini"
-sudo sed -i -e 's/upload_max_filesize = 2M/upload_max_filesize = 50M/g' "/etc/php/${phpfpmversion}/fpm/php.ini"
-sudo sed -i -e 's/post_max_size = 8M/post_max_size = 55M/g' "/etc/php/${phpfpmversion}/fpm/php.ini"
-sudo sed -i -e 's/;error_log = syslog/error_log = \/tmp\/php_error.log/g' "/etc/php/${phpfpmversion}/fpm/php.ini"
-sudo sed -i -e 's/;date.timezone =/date.timezone = Europe\/Istanbul/g' "/etc/php/${phpfpmversion}/fpm/php.ini"
-
+    # php.ini production settings
+    if [[ -f "/etc/php/${phpfpmversion}/fpm/php.ini" ]]; then
+        sudo sed -i -e 's/;realpath_cache_ttl = 120/realpath_cache_ttl = 300/g' "/etc/php/${phpfpmversion}/fpm/php.ini"
+        sudo sed -i -e 's/upload_max_filesize = 2M/upload_max_filesize = 50M/g' "/etc/php/${phpfpmversion}/fpm/php.ini"
+        sudo sed -i -e 's/post_max_size = 8M/post_max_size = 55M/g' "/etc/php/${phpfpmversion}/fpm/php.ini"
+        sudo sed -i -e 's/;error_log = syslog/error_log = \/tmp\/php_error.log/g' "/etc/php/${phpfpmversion}/fpm/php.ini"
+        sudo sed -i -e 's/;date.timezone =/date.timezone = Europe\/Istanbul/g' "/etc/php/${phpfpmversion}/fpm/php.ini"
+    fi
 
     if [[ ! -f "/etc/php/${phpfpmversion}/fpm/conf.d/10-opcache.ini" ]]; then
         sudo phpenmod -v "$phpfpmversion" -s fpm opcache
@@ -576,7 +580,7 @@ cd "$HOME/repos/ctags" && ./autogen.sh && ./configure && make -j2 && sudo make i
 # PHP Documentation inside psysh using "doc array_push" for example
 wget -qO "$HOME/.local/share/psysh/php_manual.sqlite" "http://psysh.org/manual/en/php_manual.sqlite"
 
-# Install wpcli
+# Install wpcli (PHAR Way)
 curl -O "https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar" && \
 chmod +x wp-cli.phar && sudo mv wp-cli.phar /usr/local/bin/wp
 
@@ -764,7 +768,7 @@ git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" config core.sshCommand "ssh
 echo "Installing MariaDB..."
 echo ""
 sudo apt purge mysql* mariadb* -y
-sudo apt install mariadb-server -y
+sudo apt install mariadb-server mariadb-client -y
 # 'sudo mysql' drops you into sql shell by default.
 # But you can't do anything admin related.
 
@@ -952,7 +956,7 @@ git clone "https://github.com/tricarte/wpsite" "$HOME/repos/wpsite"
 git clone "https://github.com/tricarte/wpready3" "$HOME/repos/wpready3"
 
 # Add post-commit hook to run 'composer wpstarter'
-echo "!/usr/bin/env bash
+echo "#!/usr/bin/env bash
 export PATH=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin\"
 composer wpstarter" > "$HOME/repos/wpready3/.git/hooks/post-commit"
 chmod +x "$HOME/repos/wpready3/.git/hooks/post-commit"
@@ -1038,9 +1042,20 @@ if [[ $MACHINE == "desktop" ]]; then
 php_value[memory_limit] =1073741824
 php_value[post_max_size] =100M
 php_value[upload_max_filesize] =50M
-;php_value[error_reporting] = 4339
-; Below equals to 'E_ALL'
-php_value[error_reporting] = 32767
+
+; Error Reporting Level
+; E_ERROR | E_WARNING | E_PARSE | E_NOTICE
+php_value[error_reporting] = 15
+
+; E_ALL
+; php_value[error_reporting] = 32767
+
+; E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED
+; php_value[error_reporting] = 8191
+
+; E_ERROR | E_WARNING | E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_COMPILE_WARNING | E_RECOVERABLE_ERROR
+; php_value[error_reporting] = 4339
+
 php_value[display_errors] = On
 php_value[display_startup_errors] = On
 php_value[ignore_repeated_errors] = On
