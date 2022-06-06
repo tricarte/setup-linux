@@ -523,10 +523,10 @@ sudo apt install -y vim-gtk3
 # sudo update-alternatives --install /usr/bin/vi vi /usr/local/bin/vim 1
 # sudo update-alternatives --set vi /usr/local/bin/vim
 VIM=$(command -v vim)
-sudo update-alternatives --install /usr/bin/editor editor $VIM 1
-sudo update-alternatives --set editor $VIM
-sudo update-alternatives --install /usr/bin/vi vi $VIM 1
-sudo update-alternatives --set vi $VIM
+sudo update-alternatives --install /usr/bin/editor editor "$VIM" 1
+sudo update-alternatives --set editor "$VIM"
+sudo update-alternatives --install /usr/bin/vi vi "$VIM" 1
+sudo update-alternatives --set vi "$VIM"
 
 if [[ $MACHINE == "server" ]]; then
     echo "Installing certbot..."
@@ -1047,11 +1047,18 @@ php_value[upload_max_filesize] =50M
 ; E_ERROR | E_WARNING | E_PARSE | E_NOTICE
 php_value[error_reporting] = 15
 
+; Remove annoying error messages
+; E_ALL & ~E_WARNING & ~E_NOTICE & ~E_DEPRECATED & ~E_USER_DEPRECATED
+; php_value[error_reporting] = 8181
+
 ; E_ALL
 ; php_value[error_reporting] = 32767
 
 ; E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED
 ; php_value[error_reporting] = 8191
+
+; E_ALL & ~E_WARNING & ~E_DEPRECATED & ~E_USER_DEPRECATED
+; php_value[error_reporting] = 8189
 
 ; E_ERROR | E_WARNING | E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_COMPILE_WARNING | E_RECOVERABLE_ERROR
 ; php_value[error_reporting] = 4339
