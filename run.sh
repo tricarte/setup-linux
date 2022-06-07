@@ -370,7 +370,7 @@ mkdir -p "$HOME/bin" \
 sudo apt install -y \
     python3-pip xsel mtr-tiny pydf \
     build-essential libssl-dev cmake pkg-config \
-    zip unzip autojump highlight par \
+    zip unzip autojump highlight par xclip \
     ncdu htop vnstat iftop mosh ranger httpie \
     lnav atool silversearcher-ag lynx multitail \
     shellcheck sqlite3 dnstop libpcap-dev libncurses5-dev \
