@@ -60,7 +60,6 @@ if [[ ! -f ~/.ssh/github-id_rsa ]]; then
     ssh-keygen -t rsa -f ~/.ssh/github-id_rsa -b 4096 -C "$GITEMAIL" -q -P ""
     echo "Key pair created."
     # echo "Then re-run the script again."
-    exit
 fi
 
 echo "\
@@ -612,9 +611,9 @@ npm install -g degit
 # as it is using fzf with 'find' command.
 LATEST=$( get_latest_release "sharkdp/fd" )
 cd ~ || exit
-wget \
-    "https://github.com/sharkdp/fd/releases/download/$LATEST/fd_$( echo "$LATEST" | tr -d'v' )_amd64.deb"
-sudo dpkg -i "fd_$(echo "$LATEST" | tr -d'v')_amd64.deb"
+wget -q \
+    "https://github.com/sharkdp/fd/releases/download/$LATEST/fd_$( echo "$LATEST" | tr -d 'v' )_amd64.deb"
+sudo dpkg -i "fd_$(echo "$LATEST" | tr -d 'v')_amd64.deb"
 
 # Install ripgrep ( ack, ag alternative, written in Rust )
 # LATEST=$( get_latest_release "BurntSushi/ripgrep" )
@@ -626,24 +625,24 @@ sudo dpkg -i "fd_$(echo "$LATEST" | tr -d'v')_amd64.deb"
 # Install bandwhich - bandwidth by process
 LATEST=$( get_latest_release "imsnif/bandwhich" )
 cd ~ || exit
-wget \
-    "https://github.com/imsnif/bandwhich/releases/download/$LATEST/bandwhich-v$( echo "$LATEST" | tr -d'v' )-x86_64-unknown-linux-musl.tar.gz"
+wget -q \
+    "https://github.com/imsnif/bandwhich/releases/download/$LATEST/bandwhich-v$( echo "$LATEST" | tr -d 'v' )-x86_64-unknown-linux-musl.tar.gz"
 aunpack bandwhich* && mv bandwhich ~/bin \
-    && rm -f "bandwhich-v$( echo "$LATEST" | tr -d'v' )-x86_64-unknown-linux-musl.tar.gz"
+    && rm -f "bandwhich-v$( echo "$LATEST" | tr -d 'v' )-x86_64-unknown-linux-musl.tar.gz"
 
 # Install glow (Markdown viewer).
 LATEST=$( get_latest_release "charmbracelet/glow" )
 cd ~ || exit
-wget \
-    "https://github.com/charmbracelet/glow/releases/download/$LATEST/glow_$( echo "$LATEST" | tr -d'v' )_linux_amd64.deb"
-sudo dpkg -i "glow_$(echo "$LATEST" | tr -d'v')_linux_amd64.deb"
+wget -q \
+    "https://github.com/charmbracelet/glow/releases/download/$LATEST/glow_$( echo "$LATEST" | tr -d 'v' )_linux_amd64.deb"
+sudo dpkg -i "glow_$(echo "$LATEST" | tr -d 'v')_linux_amd64.deb"
 
 # Install piknik - clipboard over network
 if [[ $MACHINE == "server" ]]; then
     LATEST=$( get_latest_release "jedisct1/piknik" )
     cd ~ || exit
-    wget \
-        "https://github.com/jedisct1/piknik/releases/download/$LATEST/piknik-linux_x86_64-$( echo "$LATEST" | tr -d'v' ).tar.gz"
+    wget -q \
+        "https://github.com/jedisct1/piknik/releases/download/$LATEST/piknik-linux_x86_64-$( echo "$LATEST" | tr -d 'v' ).tar.gz"
     aunpack piknik* && mv linux-x86_64/piknik ~/bin && rm -rf linux-x86_64
     echo "\
 [Unit]
@@ -971,7 +970,7 @@ if [[ $MACHINE == "desktop" ]]; then
     [ -d "$HOME/valet-park/adminer" ] || mkdir -p "$HOME/valet-park/adminer"
     cd "$HOME/valet-park/adminer" || exit
     wget -qO index.php "https://www.adminer.org/latest-en.php"
-    wget \
+    wget -q \
         "https://raw.githubusercontent.com/Niyko/Hydra-Dark-Theme-for-Adminer/master/adminer.css"
     cd ~ || exit
 
