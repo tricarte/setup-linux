@@ -58,11 +58,23 @@ done
 if [[ ! -f ~/.ssh/github-id_rsa ]]; then
     echo "Generating key pair for use with github/gitlab..."
     ssh-keygen -t rsa -f ~/.ssh/github-id_rsa -b 4096 -C "$GITEMAIL" -q -P ""
-    echo "Key pair created. Script will now exit."
-    echo "Add the created public key to your gitlab/github account."
-    echo "Then re-run the script again."
+    echo "Key pair created."
+    # echo "Then re-run the script again."
     exit
 fi
+
+echo "\
+If you have not already done it, add the created public key to your
+gitlab/github account. You can use the below command to copy the created
+public key if you have xclip installed on your system:
+
+If this is a local machine setup:
+    xclip -sel c -i ~/.ssh/github-id_rsa.pub
+
+If this is a remote machine setup:
+    ssh remote-user@remoteIP \"cat ~/.ssh/github-id_rsa.pub\" | xclip -sel c
+"
+read -p "After adding the public key, press enter to continue"
 
 echo "Checking Gitlab credentials..."
 echo ""
