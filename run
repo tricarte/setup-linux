@@ -321,7 +321,6 @@ vm.vfs_cache_pressure=50
 " | sudo tee -a /etc/sysctl.conf
 fi
 
-
 cd ~ || exit
 
 if [[ $MACHINE == "server" ]]; then
