@@ -604,7 +604,8 @@ sudo apt install -y nodejs yarn
 # also can download sub directory of a git repo.
 echo "Installing degit..."
 echo ""
-npm install -g degit
+# npm install -g degit
+npm install --location=global degit
 
 # Install fd.
 # This is for speeding up fuzzy search in ranger,
