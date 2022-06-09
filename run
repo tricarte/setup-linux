@@ -4,16 +4,15 @@
 # ssh-copy-id -i identity-file -f root@remote-ip-addr; ssh root@remote-ipaddr; 
 #
 # After remote login succeeds;
-# First run new_user.sh script. Log off, re-login using ssh new-user@remote-ip-addr.
+# First run newuser script. Log off, re-login using ssh new-user@remote-ip-addr.
 #
 # You have to copy your public key to the new user again,
 # using ssh-copy-id like below:
 # ssh-copy-id -i identity-file -f new-user@remote-ip-addr
 #
-# Then run this run.sh script. It will generate ssh keys if there isn't any,
-# and will then exit. You have to copy the generated public key to your
-# gitlab/github account. Re-run run.sh script to finish installation. After the
-# installation, log off and connect using your preferred ssh host config
+# Then run this "run" script. It will generate ssh keys if there isn't any. You
+# have to copy the generated public key to your gitlab/github account. After
+# the installation, log off and connect using your preferred ssh host config
 # or:
 # ssh new-user@remote-ip-addr -Pnew_port -i ~/.ssh/identity-file
 #-----------------------------------------------------------------------------------
@@ -32,18 +31,16 @@ if [[ ! $GWIFACE =~ ^[we] ]]; then
     exit 1
 fi
 
-# Installing prerequisites
-echo "Installing git..."
+echo "Installing prerequisites such as git, rsync..."
 echo ""
 sudo NEEDRESTART_SUSPEND=1 apt install git software-properties-common rsync -y
-git config --global core.sshCommand "ssh -o IdentitiesOnly=yes -i ~/.ssh/github-id_rsa -F /dev/null"
+git config --global core.sshCommand \
+    "ssh -o IdentitiesOnly=yes -i ~/.ssh/github-id_rsa -F /dev/null"
 
 # Credentials are for gitlab. And they are only used when
 # cloning private dotfiles_ng repository.
 while : ; do
     read -rp "Enter your github/gitlab username: " GITUSERNAME
-    # Not using password any more because of ssh keys.
-    # read -rsp "Enter your github/gitlab password: " GITPASSWORD
     read -rp "Enter your email address: " GITEMAIL
     echo ""
     echo "Gitlab/Github username: $GITUSERNAME"
@@ -59,7 +56,6 @@ if [[ ! -f ~/.ssh/github-id_rsa ]]; then
     echo "Generating key pair for use with github/gitlab..."
     ssh-keygen -t rsa -f ~/.ssh/github-id_rsa -b 4096 -C "$GITEMAIL" -q -P ""
     echo "Key pair created."
-    # echo "Then re-run the script again."
 fi
 
 echo "\
@@ -857,8 +853,7 @@ if [[ $MACHINE == "desktop" ]]; then
     echo "Installing desktop related apps..."
     echo ""
     sudo NEEDRESTART_SUSPEND=1 apt install -y \
-        adb fastboot \
-        appmenu-gtk2-module appmenu-gtk3-module \
+        adb fastboot appmenu-gtk2-module appmenu-gtk3-module \
         barrier dnsmasq feh plasma-discover-backend-flatpak \
         gimp gimp-gap gimp-gmic gimp-lensfun gimp-texturize \
         glmark2 kdenlive mkusb mkusb-nox usb-pack-efi \
@@ -939,7 +934,8 @@ fi
 # By default it is not activated.
 if [[ $MACHINE == "server" ]]; then
     echo "Installing Config Server Fireall - CSF"
-    sudo NEEDRESTART_SUSPEND=1 apt install libwww-perl liblwp-protocol-https-perl libgd-graph-perl -y
+    sudo NEEDRESTART_SUSPEND=1 apt install \
+        libwww-perl liblwp-protocol-https-perl libgd-graph-perl -y
     cd "$HOME/repos" || exit
     wget -q https://download.configserver.com/csf.tgz
     tar -xvzf csf.tgz
