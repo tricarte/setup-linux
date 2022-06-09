@@ -531,7 +531,7 @@ wget -qO "$HOME/bin/tldr" \
     chmod +x "$HOME/bin/tldr"
 
 # nettop: bandwidth usage by process
-git clone "https://github.com/Emanem/nettop.git" "$HOME/repos/nettop" && \
+git clone --quiet "https://github.com/Emanem/nettop.git" "$HOME/repos/nettop" && \
 cd "$HOME/repos/nettop" && make release && cp ./nettop "$HOME/bin" && cd
 
 # Add php support for ctags
@@ -541,7 +541,7 @@ wget -qO "$HOME/bin/phpctags" \
 
 # Install universal ctags
 # This is also installable from package managers.
-git clone "https://github.com/universal-ctags/ctags.git" "$HOME/repos/ctags" && \
+git clone --quiet "https://github.com/universal-ctags/ctags.git" "$HOME/repos/ctags" && \
     cd "$HOME/repos/ctags" && ./autogen.sh && ./configure && make -j2 && \
     sudo make install && cd
 
@@ -685,7 +685,7 @@ echo "Defaults:$(whoami) timestamp_timeout=30" | sudo EDITOR='tee -a' visudo
 # Install dotfiles_ng
 echo "Setting up dotfiles..."
 echo ""
-git clone --separate-git-dir="$HOME/.dotfiles" \
+git clone --quiet --separate-git-dir="$HOME/.dotfiles" \
     "git@gitlab.com:tricarte/dotfiles_ng.git" tmpdotfiles
 rsync --recursive --verbose --exclude '.git' tmpdotfiles/ "$HOME/"
 rm -r tmpdotfiles
@@ -885,8 +885,8 @@ fi # End of installation of desktop applications
 # Install wpsite
 echo "Installing wpsite..."
 echo ""
-git clone "https://github.com/tricarte/wpsite" "$HOME/repos/wpsite"
-git clone "https://github.com/tricarte/wpready3" "$HOME/repos/wpready3"
+git clone --quiet "https://github.com/tricarte/wpsite" "$HOME/repos/wpsite"
+git clone --quiet "https://github.com/tricarte/wpready3" "$HOME/repos/wpready3"
 
 # Add post-commit hook to run 'composer wpstarter'
 echo "#!/usr/bin/env bash
