@@ -35,7 +35,7 @@ fi
 # Installing prerequisites
 echo "Installing git..."
 echo ""
-sudo apt install git software-properties-common rsync -y
+sudo NEEDRESTART_SUSPEND=1 apt install git software-properties-common rsync -y
 git config --global core.sshCommand "ssh -o IdentitiesOnly=yes -i ~/.ssh/github-id_rsa -F /dev/null"
 
 # Credentials are for gitlab. And they are only used when
@@ -116,6 +116,9 @@ then
 fi
 
 start=$SECONDS
+
+sudo debconf-set-selections <<< "dma dma/mailname string $(hostname)"
+sudo debconf-set-selections <<< "dma dma/relayhost string"
 
 if [[ $MACHINE == "server" ]]; then
     echo ""
@@ -381,8 +384,8 @@ mkdir -p "$HOME/bin" \
 # chkservice: list/start/stop systemd services.
 # pv: pipe viewer
 # hey: http load testing - alternative ab (apache benchmark)
-sudo apt install -y \
-    python3-pip xsel mtr-tiny pydf \
+sudo NEEDRESTART_SUSPEND=1 apt install -y \
+    python3-pip xsel mtr-tiny pydf bashtop \
     build-essential libssl-dev cmake pkg-config \
     zip unzip autojump highlight par xclip \
     ncdu htop vnstat iftop mosh ranger httpie \
@@ -407,7 +410,7 @@ fi
 # Install nginx and PHP from ondrej PPA
 echo "Installing Nginx with PHP support..."
 echo ""
-sudo apt install -y \
+sudo NEEDRESTART_SUSPEND=1 apt install -y \
     nginx libnginx-mod-http-cache-purge php-fpm php-cli \
     php-pgsql php-sqlite3 php-gd php-curl php-memcached \
     php-mysql php-mbstring php-tidy php-xml php-bcmath php-soap \
@@ -415,7 +418,7 @@ sudo apt install -y \
     php-dev php-zip php-imap php-gmp php-redis php-apcu
 
 # PHP 7.4 packages
-# sudo apt install \
+# sudo NEEDRESTART_SUSPEND=1 apt install \
 #     php7.4-{fpm,cli,pgsql,sqlite3,gd,curl,memcached,mysql,mbstring,tidy,\
 # xml,bcmath,soap,intl,readline,imagick,msgpack,igbinary,dev,zip,imap,\
 # gmp,redis,apcu}
@@ -503,7 +506,7 @@ fi
 # so we use this package also in server environments.
 echo "Installing VIM..."
 echo ""
-sudo apt install -y vim-gtk3
+sudo NEEDRESTART_SUSPEND=1 apt install -y vim-gtk3
 
 VIM=$(command -v vim)
 sudo update-alternatives --install /usr/bin/editor editor "$VIM" 1
@@ -514,13 +517,13 @@ sudo update-alternatives --set vi "$VIM"
 if [[ $MACHINE == "server" ]]; then
     echo "Installing certbot..."
     echo ""
-    sudo apt install -y certbot python3-certbot-nginx
+    sudo NEEDRESTART_SUSPEND=1 apt install -y certbot python3-certbot-nginx
 fi
 
 # Or install directly
 echo "Installing tmux..."
 echo ""
-sudo apt install -y tmux
+sudo NEEDRESTART_SUSPEND=1 apt install -y tmux
 
 # Install cheat.sh cli client
 curl https://cht.sh/:cht.sh > "$HOME/bin/cht.sh" && chmod +x "$HOME/bin/cht.sh"
@@ -578,7 +581,7 @@ repman-io/composer-plugin
 
 echo "Installing phpunit..."
 echo ""
-sudo apt install -y phpunit
+sudo NEEDRESTART_SUSPEND=1 apt install -y phpunit
 
 # Install wp cli admin command.
 # This allows you to open site in your browser.
@@ -598,7 +601,7 @@ echo \
     | sudo tee /etc/apt/sources.list.d/yarn.list
 curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 # Above command updates the apt db.
-sudo apt install -y nodejs yarn
+sudo NEEDRESTART_SUSPEND=1 apt install -y nodejs yarn
 
 # degit: can install github repositories without its git history.
 # also can download sub directory of a git repo.
@@ -724,7 +727,7 @@ git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" config \
 echo "Installing MariaDB..."
 echo ""
 sudo apt purge mysql* mariadb* -y
-sudo apt install mariadb-server mariadb-client -y
+sudo NEEDRESTART_SUSPEND=1 apt install mariadb-server mariadb-client -y
 # 'sudo mysql' drops you into sql shell by default.
 # But you can't do anything admin related.
 
@@ -813,11 +816,6 @@ skip-name-resolve
 query_cache_type=1
 " | sudo tee -a /etc/mysql/mariadb.conf.d/60-server.cnf
 
-# needrestart is inspired by checkrestart which is in debian-goodies package.
-echo "Installing bashtop and needrestart..."
-echo ""
-sudo apt install -y bashtop needrestart
-
 echo "Setting up max journal size..."
 echo ""
 sudo sed -i -e 's/#SystemMaxUse=/SystemMaxUse=100M/g' /etc/systemd/journald.conf
@@ -858,7 +856,7 @@ if [[ $MACHINE == "desktop" ]]; then
     # appmenu-gtk2-module appmenu-gtk3-module: Global menu in KDE.
     echo "Installing desktop related apps..."
     echo ""
-    sudo apt install -y \
+    sudo NEEDRESTART_SUSPEND=1 apt install -y \
         adb fastboot \
         appmenu-gtk2-module appmenu-gtk3-module \
         barrier dnsmasq feh plasma-discover-backend-flatpak \
@@ -941,7 +939,7 @@ fi
 # By default it is not activated.
 if [[ $MACHINE == "server" ]]; then
     echo "Installing Config Server Fireall - CSF"
-    sudo apt install libwww-perl liblwp-protocol-https-perl libgd-graph-perl -y
+    sudo NEEDRESTART_SUSPEND=1 apt install libwww-perl liblwp-protocol-https-perl libgd-graph-perl -y
     cd "$HOME/repos" || exit
     wget -q https://download.configserver.com/csf.tgz
     tar -xvzf csf.tgz
@@ -952,7 +950,7 @@ fi
 
 # Not that important: A top like tool for Intel GPUs.
 # It can give hints about 3D/Video GPU Utilization, gpu clock speed.
-# sudo apt install -y intel-gpu-tools
+# sudo NEEDRESTART_SUSPEND=1 apt install -y intel-gpu-tools
 # sudo intel_gpu_top
 
 # Install Rust Lang
