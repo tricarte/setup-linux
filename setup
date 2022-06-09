@@ -925,8 +925,6 @@ if [[ $MACHINE == "server" ]]; then
             sudo usermod -aG webu "$(whoami)"
         fi
 
-        # Apply group membership changes
-        su - "$USER"
     fi
 fi
 
@@ -1044,6 +1042,9 @@ fi
 
 end=$SECONDS
 echo "Installation took $((end-start)) seconds to finish."
+echo "Will reboot in 3 seconds"
+sleep 3
+sudo reboot
 
 # https://devhints.io/bash For quick bash reference
 # https://usedevbook.com stackoverflow and language documentation searcher.
