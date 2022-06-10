@@ -381,7 +381,7 @@ mkdir -p "$HOME/bin" \
 # pv: pipe viewer
 # hey: http load testing - alternative ab (apache benchmark)
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
-    python3-pip xsel mtr-tiny pydf bashtop \
+    python3-pip xsel mtr-tiny pydf bashtop tmux \
     build-essential libssl-dev cmake pkg-config \
     zip unzip autojump highlight par xclip \
     ncdu htop vnstat iftop mosh ranger httpie \
@@ -411,7 +411,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
     php-pgsql php-sqlite3 php-gd php-curl php-memcached \
     php-mysql php-mbstring php-tidy php-xml php-bcmath php-soap \
     php-intl php-readline php-imagick php-msgpack php-igbinary \
-    php-dev php-zip php-imap php-gmp php-redis php-apcu
+    php-dev php-zip php-imap php-gmp php-redis php-apcu phpunit
 
 # PHP 7.4 packages
 # sudo NEEDRESTART_SUSPEND=1 apt install \
@@ -516,30 +516,25 @@ if [[ $MACHINE == "server" ]]; then
     sudo NEEDRESTART_SUSPEND=1 apt install -y certbot python3-certbot-nginx
 fi
 
-# Or install directly
-echo "Installing tmux..."
-echo ""
-sudo NEEDRESTART_SUSPEND=1 apt install -y tmux
+echo "Installing cheat.sh CLI client..."
+curl -s https://cht.sh/:cht.sh > "$HOME/bin/cht.sh" && chmod +x "$HOME/bin/cht.sh"
 
-# Install cheat.sh cli client
-curl https://cht.sh/:cht.sh > "$HOME/bin/cht.sh" && chmod +x "$HOME/bin/cht.sh"
-
-# Install tealdeer: tldr rust implementation
+echo "Installing tealdeer: tldr rust implementation..."
 LATEST=$(get_latest_release "dbrgn/tealdeer")
 wget -qO "$HOME/bin/tldr" \
     "https://github.com/dbrgn/tealdeer/releases/download/$LATEST/tealdeer-linux-x86_64-musl" && \
     chmod +x "$HOME/bin/tldr"
 
-# nettop: bandwidth usage by process
+echo "Installing nettop: bandwidth usage by process..."
 git clone --quiet "https://github.com/Emanem/nettop.git" "$HOME/repos/nettop" && \
 cd "$HOME/repos/nettop" && make release && cp ./nettop "$HOME/bin" && cd
 
-# Add php support for ctags
+echo "Adding php support for ctags..."
 wget -qO "$HOME/bin/phpctags" \
     "https://raw.githubusercontent.com/vim-php/phpctags/gh-pages/install/phpctags.phar" \
     && chmod +x "$HOME/bin/phpctags"
 
-# Install universal ctags
+echo "Installing universal ctags..."
 # This is also installable from package managers.
 git clone --quiet "https://github.com/universal-ctags/ctags.git" "$HOME/repos/ctags" && \
     cd "$HOME/repos/ctags" && ./autogen.sh && ./configure && make -j2 && \
@@ -549,12 +544,12 @@ git clone --quiet "https://github.com/universal-ctags/ctags.git" "$HOME/repos/ct
 wget -qO "$HOME/.local/share/psysh/php_manual.sqlite" \
     "http://psysh.org/manual/en/php_manual.sqlite"
 
-# Install wpcli (PHAR Way)
+echo "Installing wpcli (PHAR Way)..."
 curl -O \
     "https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar" && \
     chmod +x wp-cli.phar && sudo mv wp-cli.phar /usr/local/bin/wp
 
-# Install composer
+echo "Installing composer..."
 php -r "readfile('http://getcomposer.org/installer');" \
     | sudo php -- --install-dir=/usr/bin/ --filename=composer
 
@@ -562,29 +557,23 @@ composer config --global github-oauth.github.com "$GHTOKEN"
 composer config --global repo.packagist composer https://packagist.org
 composer config --global allow-plugins.repman-io/composer-plugin true -n
 
-# Install psysh: PHP Repl
-composer g require psy/psysh:@stable
-
-# Setup composer global packages
+echo "Installing composer global packages"
 # repman-io/composer-plugin will provide CDN support for php packages.
 # gordalina/cachetool opcache reset tool
-composer global require "squizlabs/php_codesniffer=*" \
+composer g require --quiet "squizlabs/php_codesniffer=*" \
+"psy/psysh:@stable" \
 mnapoli/pretty \
 seld/jsonlint \
 friendsofphp/php-cs-fixer \
 gordalina/cachetool \
 repman-io/composer-plugin
 
-echo "Installing phpunit..."
-echo ""
-sudo NEEDRESTART_SUSPEND=1 apt install -y phpunit
-
-# Install wp cli admin command.
+echo "Installing wp cli admin command..."
 # This allows you to open site in your browser.
-wp package install git@github.com:wp-cli/admin-command.git
+wp --quiet package install git@github.com:wp-cli/admin-command.git
 
-# Install wp cli secure command.
-wp package install git@github.com:igorhrcek/wp-cli-secure-command.git
+echo "Installing wp cli secure command..."
+wp --quiet package install git@github.com:igorhrcek/wp-cli-secure-command.git
 
 # Install nodejs lts and npm (npm comes with nodejs)
 # https://github.com/nodesource/distributions/blob/master/README.md#debinstall
@@ -603,18 +592,19 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y nodejs yarn
 # also can download sub directory of a git repo.
 echo "Installing degit..."
 echo ""
-# npm install -g degit
 npm install --location=global degit
 
-# Install fd.
+echo "Installing fd-find..."
 # This is for speeding up fuzzy search in ranger,
 # as it is using fzf with 'find' command.
 LATEST=$( get_latest_release "sharkdp/fd" )
 cd ~ || exit
-wget -q \
+wget -qO "$HOME/fd.deb" \
     "https://github.com/sharkdp/fd/releases/download/$LATEST/fd_$( echo "$LATEST" | tr -d 'v' )_amd64.deb"
-sudo dpkg -i "fd_$(echo "$LATEST" | tr -d 'v')_amd64.deb"
+sudo dpkg -i "fd.deb"
+rm -f fd.deb
 
+# Moved to direct install
 # Install ripgrep ( ack, ag alternative, written in Rust )
 # LATEST=$( get_latest_release "BurntSushi/ripgrep" )
 # cd ~ || exit
@@ -622,28 +612,29 @@ sudo dpkg -i "fd_$(echo "$LATEST" | tr -d 'v')_amd64.deb"
 #     "https://github.com/BurntSushi/ripgrep/releases/download/$LATEST/ripgrep_${LATEST}_amd64.deb"
 # sudo dpkg -i "ripgrep_${LATEST}_amd64.deb"
 
-# Install bandwhich - bandwidth by process
+echo "Installing bandwhich - monitor network bandwidth by process..."
 LATEST=$( get_latest_release "imsnif/bandwhich" )
 cd ~ || exit
-wget -q \
+wget -qO "$HOME/bandwhich.tar.gz" \
     "https://github.com/imsnif/bandwhich/releases/download/$LATEST/bandwhich-v$( echo "$LATEST" | tr -d 'v' )-x86_64-unknown-linux-musl.tar.gz"
-aunpack bandwhich* && mv bandwhich ~/bin \
-    && rm -f "bandwhich-v$( echo "$LATEST" | tr -d 'v' )-x86_64-unknown-linux-musl.tar.gz"
+aunpack bandwhich.tar.gz && mv bandwhich ~/bin \
+    && rm -f bandwhich.tar.gz
 
-# Install glow (Markdown viewer).
+echo "Installing glow (Markdown viewer)..."
 LATEST=$( get_latest_release "charmbracelet/glow" )
 cd ~ || exit
-wget -q \
+wget -qO "$HOME/glow.deb" \
     "https://github.com/charmbracelet/glow/releases/download/$LATEST/glow_$( echo "$LATEST" | tr -d 'v' )_linux_amd64.deb"
-sudo dpkg -i "glow_$(echo "$LATEST" | tr -d 'v')_linux_amd64.deb"
+sudo dpkg -i "glow.deb"
+rm -f glow.deb
 
-# Install piknik - clipboard over network
+echo "Installing piknik - clipboard over network..."
 if [[ $MACHINE == "server" ]]; then
     LATEST=$( get_latest_release "jedisct1/piknik" )
     cd ~ || exit
-    wget -q \
+    wget -qO "$HOME/piknik.tar.gz" \
         "https://github.com/jedisct1/piknik/releases/download/$LATEST/piknik-linux_x86_64-$( echo "$LATEST" | tr -d 'v' ).tar.gz"
-    aunpack piknik* && mv linux-x86_64/piknik ~/bin && rm -rf linux-x86_64
+    aunpack piknik.tar.gz && mv linux-x86_64/piknik ~/bin && rm -rf linux-x86_64 && rm -f piknik.tar.gz
     echo "\
 [Unit]
 Description=Piknik - clipboard over network
@@ -682,8 +673,7 @@ echo \
     | sudo EDITOR='tee -a' visudo
 echo "Defaults:$(whoami) timestamp_timeout=30" | sudo EDITOR='tee -a' visudo
 
-# Install dotfiles_ng
-echo "Setting up dotfiles..."
+echo "Installing dotfiles..."
 echo ""
 git clone --quiet --separate-git-dir="$HOME/.dotfiles" \
     "git@gitlab.com:tricarte/dotfiles_ng.git" tmpdotfiles
@@ -779,6 +769,7 @@ log_slow_verbosity     = query_plan,explain
 long_query_time = 1
 # Below will pollute the mysql-slow.log file as it will log nearly every query.
 # log_queries_not_using_indexes=ON
+# Privileges with domain names (even localhost) may not work with this setting
 skip-name-resolve
 
 # This size should contain most of the active data set of your server so that
@@ -861,9 +852,10 @@ if [[ $MACHINE == "desktop" ]]; then
         ubuntu-restricted-addons filelight libnotify-bin
 
         # Install MailHog
-        # Run it as: ~/go/bin/MailHog
+        # Manually running: ~/go/bin/MailHog
         # the HTTP server starts on port 8025
         # go get github.com/mailhog/MailHog
+        echo "Installing MailHog..."
         LATEST=$(get_latest_release "mailhog/MailHog")
         wget -qO "$HOME/bin/MailHog" \
             "https://github.com/mailhog/MailHog/releases/download/${LATEST}/MailHog_linux_amd64" \
@@ -924,7 +916,6 @@ if [[ $MACHINE == "server" ]]; then
         if [[ ! $? ]]; then
             sudo usermod -aG webu "$(whoami)"
         fi
-
     fi
 fi
 
@@ -967,7 +958,7 @@ if [[ $MACHINE == "desktop" ]]; then
         "https://raw.githubusercontent.com/Niyko/Hydra-Dark-Theme-for-Adminer/master/adminer.css"
     cd ~ || exit
 
-    composer global require cpriego/valet-linux
+    composer global require --quiet cpriego/valet-linux
     "$HOME/.composer/vendor/bin/valet" install
 
     cat <<EOT >> "/etc/php/${phpfpmversion}/fpm/pool.d/valet.conf"
@@ -1042,8 +1033,9 @@ fi
 
 end=$SECONDS
 echo "Installation took $((end-start)) seconds to finish."
-echo "Will reboot in 3 seconds"
+echo "Will reboot in 3 seconds..."
 sleep 3
+# FIXME: would you like to reboot now
 sudo reboot
 
 # https://devhints.io/bash For quick bash reference
