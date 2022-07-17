@@ -69,7 +69,7 @@ If this is a local machine setup:
 If this is a remote machine setup:
     ssh remote-user@remoteIP \"cat ~/.ssh/github-id_rsa.pub\" | xclip -sel c
 "
-read -p "After adding the public key, press enter to continue"
+read -rp "After adding the public key, press enter to continue"
 
 echo "Checking Gitlab credentials..."
 echo ""
@@ -380,6 +380,7 @@ mkdir -p "$HOME/bin" \
 # chkservice: list/start/stop systemd services.
 # pv: pipe viewer
 # hey: http load testing - alternative ab (apache benchmark)
+# atool: tool for managing file archives
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
     python3-pip xsel mtr-tiny pydf bashtop tmux \
     build-essential libssl-dev cmake pkg-config \
@@ -527,7 +528,7 @@ wget -qO "$HOME/bin/tldr" \
 
 echo "Installing nettop: bandwidth usage by process..."
 git clone --quiet "https://github.com/Emanem/nettop.git" "$HOME/repos/nettop" && \
-cd "$HOME/repos/nettop" && make release && cp ./nettop "$HOME/bin" && cd
+cd "$HOME/repos/nettop" && make release && cp ./nettop "$HOME/bin" && cd "$HOME" || exit
 
 echo "Adding php support for ctags..."
 wget -qO "$HOME/bin/phpctags" \
@@ -538,7 +539,7 @@ echo "Installing universal ctags..."
 # This is also installable from package managers.
 git clone --quiet "https://github.com/universal-ctags/ctags.git" "$HOME/repos/ctags" && \
     cd "$HOME/repos/ctags" && ./autogen.sh && ./configure && make -j2 && \
-    sudo make install && cd
+    sudo make install && cd "$HOME" || exit
 
 # PHP Documentation inside psysh using "doc array_push" for example
 wget -qO "$HOME/.local/share/psysh/php_manual.sqlite" \
@@ -593,6 +594,27 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y nodejs yarn
 echo "Installing degit..."
 echo ""
 npm install --location=global degit
+
+# prettier: code formatter
+echo "Installing prettier..."
+echo ""
+npm install --global prettier @prettier/plugin-php
+
+# intelephense: code completion source for php in vim
+echo "Installing intelephense..."
+echo ""
+npm install --global intelephense
+
+# markdownlint
+echo "Installing markdownlint"
+echo ""
+npm install --global markdownlint-cli2
+
+# WordPress-Coding-Standards: php_codesniffer based sniffs for WordPress
+echo "Installing WordPress-Coding-Standards PHPCS Sniffs"
+echo ""
+git clone -b master https://github.com/WordPress/WordPress-Coding-Standards.git "$HOME/repos/wpcs"
+"$HOME/.composer/vendor/bin/phpcs" --config-set installed_paths "$HOME/repos/wpcs"
 
 echo "Installing fd-find..."
 # This is for speeding up fuzzy search in ranger,
@@ -713,6 +735,8 @@ git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" config \
 echo "Installing MariaDB..."
 echo ""
 sudo apt purge mysql* mariadb* -y
+# mysqldump along with many other database related tools
+# come with mariadb-client package.
 sudo NEEDRESTART_SUSPEND=1 apt install mariadb-server mariadb-client -y
 # 'sudo mysql' drops you into sql shell by default.
 # But you can't do anything admin related.
