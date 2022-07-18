@@ -385,7 +385,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
     python3-pip xsel mtr-tiny pydf bashtop tmux \
     build-essential libssl-dev cmake pkg-config \
     zip unzip autojump highlight par xclip \
-    ncdu htop vnstat iftop mosh ranger httpie \
+    ncdu htop vnstat vnstati iftop mosh ranger httpie \
     lnav atool silversearcher-ag lynx multitail \
     shellcheck sqlite3 dnstop libpcap-dev libncurses5-dev \
     libsqlite3-dev autoconf secure-delete \
