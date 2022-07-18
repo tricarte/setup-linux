@@ -872,7 +872,7 @@ if [[ $MACHINE == "desktop" ]]; then
         barrier dnsmasq feh plasma-discover-backend-flatpak \
         gimp gimp-gap gimp-gmic gimp-lensfun gimp-texturize \
         glmark2 kdenlive mkusb mkusb-nox usb-pack-efi \
-        safeeyes simplescreenrecorder sqlitebrowser \
+        safeeyes simplescreenrecorder sqlitebrowser zeal \
         ubuntu-restricted-addons filelight libnotify-bin
 
         # Install MailHog
