@@ -984,6 +984,9 @@ if [[ $MACHINE == "desktop" ]]; then
 
     composer global require --quiet cpriego/valet-linux
     "$HOME/.composer/vendor/bin/valet" install
+    if [[ -d "$HOME/valet-park" ]]; then
+        (cd "$HOME/valet-park" && "$HOME/.composer/vendor/bin/valet park")
+    fi
 
     cat <<EOT >> "/etc/php/${phpfpmversion}/fpm/pool.d/valet.conf"
 ; Memory limit 1G
