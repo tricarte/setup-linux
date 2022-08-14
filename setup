@@ -1039,11 +1039,14 @@ EOT
         fi
     fi
 
-    if [[ -f /etc/dnsmasq.d/valet ]]; then
-        echo "address=/.test/127.0.0.1" | sudo tee /etc/dnsmasq.d/valet
-    fi
+    "$HOME/.composer/vendor/bin/valet" domain test
+    # Below is the manual version of the command above.
+    # if [[ -f /etc/dnsmasq.d/valet ]]; then
+    #     echo "address=/.test/127.0.0.1" | sudo tee /etc/dnsmasq.d/valet
+    # fi
 
-    echo "server=9.9.9.9" | sudo tee /etc/dnsmasq.d/server
+    # This may make dns resolution slow, so it is disabled
+    # echo "server=9.9.9.9" | sudo tee /etc/dnsmasq.d/server
 
     sudo systemctl restart dnsmasq.service
 
