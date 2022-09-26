@@ -605,6 +605,9 @@ echo "Installing intelephense..."
 echo ""
 npm install --global intelephense
 
+# starship.rs: a shell prompt customized for git repos
+curl -sS https://starship.rs/install.sh | sh
+
 # markdownlint
 echo "Installing markdownlint"
 echo ""
