@@ -393,7 +393,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
     apache2-utils ntpdate watchman incron hey \
     renameutils libncurses5 gdebi-core mailutils postfix- \
     iotop lshw hwinfo pv libnss3-tools jq chkservice \
-    optipng pngquant jpegoptim imagemagick bat ripgrep
+    optipng pngquant jpegoptim imagemagick bat ripgrep pigz
 
 pip install --user tmuxp
 
