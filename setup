@@ -1049,7 +1049,12 @@ EOT
     # fi
 
     # This may make dns resolution slow, so it is disabled
+    # Upstream dns server setting for dnsmasq.
     # echo "server=9.9.9.9" | sudo tee /etc/dnsmasq.d/server
+
+    # You may need to modify this file after valet installation.
+    # /etc/nginx/sites-available/valet.conf
+    # listen 80 default_server;
 
     sudo systemctl restart dnsmasq.service
 
