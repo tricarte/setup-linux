@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-#-----------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # After server creation, from your local client issue the following command:
-# ssh-copy-id -i identity-file -f root@remote-ip-addr; ssh root@remote-ipaddr; 
+# ssh-copy-id -i identity-file -f root@remote-ip-addr; ssh root@remote-ipaddr;
 #
 # After remote login succeeds;
 # First run newuser script. Log off, re-login using ssh new-user@remote-ip-addr.
@@ -15,7 +15,7 @@
 # the installation, log off and connect using your preferred ssh host config
 # or:
 # ssh new-user@remote-ip-addr -Pnew_port -i ~/.ssh/identity-file
-#-----------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 if [ "$(id -u)" == "0" ]; then
    echo "This script must not be run as root." 1>&2
@@ -146,7 +146,7 @@ fi
 get_latest_release() {
     curl -H "Authorization: token ${GHTOKEN}" --silent \
         "https://api.github.com/repos/$1/releases/latest" \
-        | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'                        
+        | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
     }
 
 ##################
@@ -367,20 +367,20 @@ mkdir -p "$HOME/bin" \
     "$HOME/sites" \
     "$HOME/.composer"
 
-# renameutils provides imv that can rename files with long names easily.
-# mtr-tiny:  Interactive traceroute alternative.
+# renameutils: Provides imv that can rename files with long names easily.
+# mtr-tiny: Interactive traceroute alternative.
 # pydf: More human friendly df.
 # ncdu: Sort files by size.
-# highlight: convert source code to formatted text.
+# highlight: Convert source code to formatted text.
 # secure-delete: Provides srm instead of rm.
 # libncurses5 is needed for nettop
 # mailutils provide mailx which is used by ngxblocker to send its mails.
 # darkstat can be an alternative to vnstat with web interface.
 # You can use "gdebi" instead of "dpkg -i" to install packages with their dependencies.
 # chkservice: list/start/stop systemd services.
-# pv: pipe viewer
-# hey: http load testing - alternative ab (apache benchmark)
-# atool: tool for managing file archives
+# pv: Pipe viewer
+# hey: HTTP load testing - alternative ab (apache benchmark)
+# atool: Tool for managing file archives
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
     python3-pip xsel mtr-tiny pydf bashtop tmux \
     build-essential libssl-dev cmake pkg-config \
@@ -697,6 +697,8 @@ echo \
     "$(whoami) ALL=NOPASSWD: /usr/sbin/iftop, /usr/bin/dnstop, /usr/sbin/iotop, /home/$(whoami)/repos/nettop/nettop" \
     | sudo EDITOR='tee -a' visudo
 echo "Defaults:$(whoami) timestamp_timeout=30" | sudo EDITOR='tee -a' visudo
+
+curl -sS https://starship.rs/install.sh | sh -s -- -y
 
 echo "Installing dotfiles..."
 echo ""
