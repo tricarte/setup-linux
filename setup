@@ -691,6 +691,7 @@ git config --global user.name "$GITUSERNAME"
 git config --global user.email "$GITEMAIL"
 git config --global core.editor vim
 git config --global core.excludesfile ~/.gitignore_global
+git config --global init.defaultBranch main
 
 # Don't require password for these executables.
 echo \
