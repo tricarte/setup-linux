@@ -846,6 +846,7 @@ if [[ $MACHINE == "desktop" ]]; then
 # ppa:graphics-drivers/ppa : Latest NVIDIA drivers
 # ppa:maarten-baert/simplescreenrecorder" # This PPA does not exist for 2204
 # ppa:kisak/kisak-mesa: Latest stable Mesa drivers
+# ppa:wereturtle/ppa: ghostwriter markdown editor
     PPAS=(
         "ppa:kisak/kisak-mesa"
         "ppa:mkusb/ppa"
@@ -855,6 +856,7 @@ if [[ $MACHINE == "desktop" ]]; then
         "ppa:jonmagon/kdiskmark"
         "ppa:graphics-drivers/ppa"
         "ppa:libreoffice/ppa"
+        "ppa:wereturtle/ppa"
     )
 
     echo "Adding necessary PPAs for the desktop..."
