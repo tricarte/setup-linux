@@ -881,7 +881,8 @@ if [[ $MACHINE == "desktop" ]]; then
         gimp gimp-gap gimp-gmic gimp-lensfun gimp-texturize \
         glmark2 kdenlive mkusb mkusb-nox usb-pack-efi \
         safeeyes simplescreenrecorder sqlitebrowser zeal \
-        ubuntu-restricted-addons filelight libnotify-bin
+        ubuntu-restricted-addons filelight libnotify-bin \
+        ghostwriter
 
         # Install MailHog
         # Manually running: ~/go/bin/MailHog
