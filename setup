@@ -381,6 +381,9 @@ mkdir -p "$HOME/bin" \
 # pv: Pipe viewer
 # hey: HTTP load testing - alternative ab (apache benchmark)
 # atool: Tool for managing file archives
+# glances and smem: System monitoring related packages
+
+# Default packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
     python3-pip xsel mtr-tiny pydf bashtop tmux \
     build-essential libssl-dev cmake pkg-config \
@@ -393,7 +396,8 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
     apache2-utils ntpdate watchman incron hey \
     renameutils libncurses5 gdebi-core mailutils postfix- \
     iotop lshw hwinfo pv libnss3-tools jq chkservice \
-    optipng pngquant jpegoptim imagemagick bat ripgrep pigz
+    optipng pngquant jpegoptim imagemagick bat ripgrep pigz \
+    glances smem
 
 pip install --user tmuxp
 
