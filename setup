@@ -416,7 +416,8 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
     php-pgsql php-sqlite3 php-gd php-curl php-memcached \
     php-mysql php-mbstring php-tidy php-xml php-bcmath php-soap \
     php-intl php-readline php-imagick php-msgpack php-igbinary \
-    php-dev php-zip php-imap php-gmp php-redis php-apcu phpunit
+    php-dev php-zip php-imap php-gmp php-redis php-apcu phpunit \
+    php-yaml
 
 # PHP 7.4 packages
 # sudo NEEDRESTART_SUSPEND=1 apt install \
@@ -1086,6 +1087,8 @@ sleep 3
 # FIXME: would you like to reboot now
 sudo reboot
 
+# https://github.com/extrawurst/gitui At the end of the page, there are
+# list of alternatives
 # https://devhints.io/bash For quick bash reference
 # https://usedevbook.com stackoverflow and language documentation searcher.
 
