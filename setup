@@ -382,8 +382,9 @@ mkdir -p "$HOME/bin" \
 # hey: HTTP load testing - alternative ab (apache benchmark)
 # atool: Tool for managing file archives
 # glances and smem: System monitoring related packages
+# surfraw: Start browser based WEB requests using cli
 
-# Default packages
+# Default common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
     python3-pip xsel mtr-tiny pydf bashtop tmux \
     build-essential libssl-dev cmake pkg-config \
@@ -397,7 +398,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
     renameutils libncurses5 gdebi-core mailutils postfix- \
     iotop lshw hwinfo pv libnss3-tools jq chkservice \
     optipng pngquant jpegoptim imagemagick bat ripgrep pigz \
-    glances smem
+    glances smem surfraw
 
 pip install --user tmuxp
 
