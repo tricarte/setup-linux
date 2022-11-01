@@ -383,6 +383,7 @@ mkdir -p "$HOME/bin" \
 # atool: Tool for managing file archives
 # glances and smem: System monitoring related packages
 # surfraw: Start browser based WEB requests using cli
+# sxiv: X image viewer
 
 # Default common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -398,7 +399,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
     renameutils libncurses5 gdebi-core mailutils postfix- \
     iotop lshw hwinfo pv libnss3-tools jq chkservice \
     optipng pngquant jpegoptim imagemagick bat ripgrep pigz \
-    glances smem surfraw
+    glances smem surfraw sxiv
 
 pip install --user tmuxp
 
