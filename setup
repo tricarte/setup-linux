@@ -883,6 +883,8 @@ if [[ $MACHINE == "desktop" ]]; then
     # dnsmasq: For valet-linux
     # barrier: Synergy alternative
     # appmenu-gtk2-module appmenu-gtk3-module: Global menu in KDE.
+    # libstartup-notification0: To get rid of a warning message that kitty
+    # terminal emulator gives when using 'kitty launch'
     echo "Installing desktop related apps..."
     echo ""
     sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -892,7 +894,7 @@ if [[ $MACHINE == "desktop" ]]; then
         glmark2 kdenlive mkusb mkusb-nox usb-pack-efi \
         safeeyes simplescreenrecorder sqlitebrowser zeal \
         ubuntu-restricted-addons filelight libnotify-bin \
-        ghostwriter
+        ghostwriter libstartup-notification0
 
         # Install MailHog
         # Manually running: ~/go/bin/MailHog
