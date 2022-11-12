@@ -403,7 +403,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
     renameutils libncurses5 gdebi-core mailutils postfix- \
     iotop lshw hwinfo pv libnss3-tools jq chkservice \
     optipng pngquant jpegoptim imagemagick bat ripgrep pigz \
-    glances smem surfraw sxiv bmon cmatrix timg chafa
+    glances smem surfraw sxiv bmon cmatrix timg chafa tty-clock
 
 pip install --user tmuxp
 
