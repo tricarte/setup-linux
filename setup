@@ -386,7 +386,8 @@ mkdir -p "$HOME/bin" \
 # sxiv: X image viewer. Can output selection to stdout.
 # bmon: Another bandwidth monitor. bmon -p wlp2s0
 # cmatrix: Guess what
-# timg: Terminal image viwer in low resolution.
+# timg: Terminal image viwer
+# chafa: Terminal image viwer. Seems a little bit faster than timg.
 
 # Default common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -402,7 +403,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
     renameutils libncurses5 gdebi-core mailutils postfix- \
     iotop lshw hwinfo pv libnss3-tools jq chkservice \
     optipng pngquant jpegoptim imagemagick bat ripgrep pigz \
-    glances smem surfraw sxiv bmon cmatrix timg
+    glances smem surfraw sxiv bmon cmatrix timg chafa
 
 pip install --user tmuxp
 
