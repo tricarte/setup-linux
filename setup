@@ -1088,6 +1088,25 @@ EOT
     fi
 fi
 
+# Install veracrypt
+if [[ $MACHINE == "desktop" ]]; then
+    url="https://launchpad.net/veracrypt/trunk/"
+    response=$(lynx -dump $url)
+    vc_version=$(echo "$response" | grep "Latest version is" | tr -s ' ' | cut -d" " -f5)
+    ubuntu_version=$(lsb_release -rs)
+    download_url="https://launchpad.net/veracrypt/trunk/${vc_version}/+download/veracrypt-${vc_version}-Ubuntu-${ubuntu_version}-amd64.deb"
+
+    echo "Downloading veracrypt from Launchpad..."
+    wget -qO "$HOME/veracrypt.deb" "$download_url"
+
+    if [[ -f "$HOME/veracrypt.deb" ]]; then
+        sudo apt instal -y "$HOME/veracrypt.deb"
+    else
+        echo "Could not download veracrypt!"
+        echo "The url was: ${download_url}."
+    fi
+fi
+
 end=$SECONDS
 echo "Installation took $((end-start)) seconds to finish."
 echo "Will reboot in 3 seconds..."
@@ -1102,6 +1121,9 @@ sudo reboot
 
 # https://gist.githubusercontent.com/BAGELreflex/c04e7a25d64e989cbd9376a9134b8f6d/raw/eea51d63d32dc97ff434a75b192eccaf66609ffb/cdm_fio.sh
 # Copy above fio script to bin and `cdm_fio.sh ./`. Change $LOOP variable. IO Benchmark
+
+# TODO: kitty installation and launching
+# $HOME/.local/kitty.app/bin/kitty --listen-on unix:/tmp/mykitty
 
 # TODO: 7G Firewall now supports nginx. It's a very easy installation.
 # Just take care of accidental multiple inclusion of 7g conf files from both nginx.conf and
