@@ -941,7 +941,7 @@ EOL
   if [[ -f "$HOME/repos/debs/dragon/dragon-drag-and-drop_1.1.1-1_amd64.deb" ]]; then
     sudo apt install -y "$HOME/repos/debs/dragon/dragon-drag-and-drop_1.1.1-1_amd64.deb"
   fi
-  
+
   # Install nsxiv image viewer from local deb
   echo "Installing nsxiv image viewer"
   if [[ -f "$HOME/repos/debs/nsxiv/nsxiv_30-2_amd64.deb" ]]; then
@@ -1147,10 +1147,13 @@ fi
 
 end=$SECONDS
 echo "Installation took $((end - start)) seconds to finish."
-echo "Will reboot in 3 seconds..."
-sleep 3
-# FIXME: would you like to reboot now
-sudo reboot
+
+read -p "Would you like to reboot now?  (y/n) (Default No): " -r
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+  sudo reboot
+fi
+
+exit
 
 # https://github.com/extrawurst/gitui At the end of the page, there are
 # list of alternatives
