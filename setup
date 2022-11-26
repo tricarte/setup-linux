@@ -18,44 +18,44 @@
 #------------------------------------------------------------------------------
 
 if [ "$(id -u)" == "0" ]; then
-   echo "This script must not be run as root." 1>&2
-   exit 1
+  echo "This script must not be run as root." 1>&2
+  exit 1
 fi
 
 GWIFACE=$(ip route | grep default | cut -d" " -f5)
 IPADDR=$(hostname -I)
 
 if [[ ! $GWIFACE =~ ^[we] ]]; then
-    echo "You are not connected to the internet through wireless or ethernet card..."
-    echo ""
-    exit 1
+  echo "You are not connected to the internet through wireless or ethernet card..."
+  echo ""
+  exit 1
 fi
 
 echo "Installing prerequisites such as git, rsync..."
 echo ""
 sudo NEEDRESTART_SUSPEND=1 apt install git software-properties-common rsync -y
 git config --global core.sshCommand \
-    "ssh -o IdentitiesOnly=yes -i ~/.ssh/github-id_rsa -F /dev/null"
+  "ssh -o IdentitiesOnly=yes -i ~/.ssh/github-id_rsa -F /dev/null"
 
 # Credentials are for gitlab. And they are only used when
 # cloning private dotfiles_ng repository.
-while : ; do
-    read -rp "Enter your github/gitlab username: " GITUSERNAME
-    read -rp "Enter your email address: " GITEMAIL
-    echo ""
-    echo "Gitlab/Github username: $GITUSERNAME"
-    echo "Email: $GITEMAIL"
+while :; do
+  read -rp "Enter your github/gitlab username: " GITUSERNAME
+  read -rp "Enter your email address: " GITEMAIL
+  echo ""
+  echo "Gitlab/Github username: $GITUSERNAME"
+  echo "Email: $GITEMAIL"
 
-    echo ""
-    read -p "Are these values correct?  (y/n): " -r
-    echo ""
-    [[ ! $REPLY =~ ^[Yy]$ ]] || break
+  echo ""
+  read -p "Are these values correct?  (y/n): " -r
+  echo ""
+  [[ ! $REPLY =~ ^[Yy]$ ]] || break
 done
 
 if [[ ! -f ~/.ssh/github-id_rsa ]]; then
-    echo "Generating key pair for use with github/gitlab..."
-    ssh-keygen -t rsa -f ~/.ssh/github-id_rsa -b 4096 -C "$GITEMAIL" -q -P ""
-    echo "Key pair created."
+  echo "Generating key pair for use with github/gitlab..."
+  ssh-keygen -t rsa -f ~/.ssh/github-id_rsa -b 4096 -C "$GITEMAIL" -q -P ""
+  echo "Key pair created."
 fi
 
 echo "\
@@ -73,81 +73,83 @@ read -rp "After adding the public key, press enter to continue"
 
 echo "Checking Gitlab credentials..."
 echo ""
-git ls-remote "git@gitlab.com:tricarte/dotfiles_ng.git" > /dev/null 2>&1 \
-    || ( echo "Gitlab credentials are not working. Exiting..."; exit 1; )
+git ls-remote "git@gitlab.com:tricarte/dotfiles_ng.git" >/dev/null 2>&1 ||
+  (
+    echo "Gitlab credentials are not working. Exiting..."
+    exit 1
+  )
 echo "Gitlab credentials are working!"
 echo ""
 
 read -rp "Enter your github access token: " GHTOKEN
 
 if curl -H "Authorization: token ${GHTOKEN}" --silent "https://api.github.com" | grep -q "Bad credentials"; then
-    echo "Your github access token is not valid!"
-    exit 1
+  echo "Your github access token is not valid!"
+  exit 1
 fi
-    
+
 echo "Is this a server or desktop?"
-select machine_type in Server Desktop
-do
-    case $machine_type in
-        Server)
-        MACHINE="server"
-        break
-        ;;
-        Desktop)
-        MACHINE="desktop"
-        break
-        ;; *)
-        echo "Select either 1 or 2."
-        ;;
-esac
+select machine_type in Server Desktop; do
+  case $machine_type in
+  Server)
+    MACHINE="server"
+    break
+    ;;
+  Desktop)
+    MACHINE="desktop"
+    break
+    ;;
+  *)
+    echo "Select either 1 or 2."
+    ;;
+  esac
 done
 
 read -p \
-    "This machine is a $MACHINE. Proceed installation?  (y/n) (Default n): "  \
-    -r -n1
-if [[ ! $REPLY =~ ^[Yy]$ ]]
-then
-    echo "Installation aborted."
-    exit 1
+  "This machine is a $MACHINE. Proceed installation?  (y/n) (Default n): " \
+  -r -n1
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+  echo "Installation aborted."
+  exit 1
 fi
 
 start=$SECONDS
 
-sudo debconf-set-selections <<< "dma dma/mailname string $(hostname)"
-sudo debconf-set-selections <<< "dma dma/relayhost string"
+sudo debconf-set-selections <<<"dma dma/mailname string $(hostname)"
+sudo debconf-set-selections <<<"dma dma/relayhost string"
 
 if [[ $MACHINE == "server" ]]; then
+  echo ""
+  read -rp "What port would you like to use for the ssh server?: " SSHPORT
+
+  while [[ "$SSHPORT" -lt 1024 || "$SSHPORT" -gt 65535 ]]; do
+    read -p "Enter a port number between 1024 and 65535: " -er SSHPORT
+  done
+
+  while :; do
     echo ""
-    read -rp "What port would you like to use for the ssh server?: " SSHPORT
+    echo "Specify MariaDB 'admin' user password: "
+    read -rs DBPASSWORD
 
-    while [[ "$SSHPORT" -lt 1024 ||  "$SSHPORT" -gt 65535 ]]; do
-        read -p "Enter a port number between 1024 and 65535: " -er SSHPORT
-    done
+    echo "Reenter MariaDB 'admin' user password: "
+    read -rs DBPASSWORDCHK
 
-    while : ; do
-        echo ""
-        echo "Specify MariaDB 'admin' user password: "
-        read -rs DBPASSWORD
-
-        echo "Reenter MariaDB 'admin' user password: "
-        read -rs DBPASSWORDCHK
-
-        if [[ $DBPASSWORD == "$DBPASSWORDCHK" ]]; then
-            break
-        else
-            echo ""
-            echo "Passwords do not match."
-        fi
-    done
+    if [[ $DBPASSWORD == "$DBPASSWORDCHK" ]]; then
+      break
+    else
+      echo ""
+      echo "Passwords do not match."
+    fi
+  done
 fi
 
 # https://gist.github.com/lukechilds/a83e1d7127b78fef38c2914c4ececc3c
 # Get the latest release version number of a github project.
 get_latest_release() {
-    curl -H "Authorization: token ${GHTOKEN}" --silent \
-        "https://api.github.com/repos/$1/releases/latest" \
-        | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
-    }
+  curl -H "Authorization: token ${GHTOKEN}" --silent \
+    "https://api.github.com/repos/$1/releases/latest" |
+    grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
+}
 
 ##################
 #  List of PPAs  #
@@ -155,16 +157,15 @@ get_latest_release() {
 
 # Ubuntu 22.04 comes with PHP 8.1
 PPAS=(
-    "ppa:ondrej/php"
-    "ppa:ondrej/nginx"
-    "ppa:jonathonf/vim-daily"
+  "ppa:ondrej/php"
+  "ppa:ondrej/nginx"
+  "ppa:jonathonf/vim-daily"
 )
 
 echo "Adding necessary PPAs..."
 echo ""
-for ppa in "${PPAS[@]}"
-do
-    sudo add-apt-repository -y "$ppa" -n
+for ppa in "${PPAS[@]}"; do
+  sudo add-apt-repository -y "$ppa" -n
 done
 
 sudo apt update -y && sudo apt upgrade -y
@@ -172,18 +173,18 @@ sudo apt update -y && sudo apt upgrade -y
 echo "Configuring timezone..."
 echo ""
 if [[ $MACHINE == "server" ]]; then
-    # This may only be necessary in cloud servers.
-    echo "Europe/Istanbul" | sudo tee /etc/timezone
-    # Below command didn't reconfigure tzdata but the other one worked:
-    # sudo dpkg-reconfigure tzdata
-    sudo dpkg-reconfigure --frontend noninteractive tzdata
+  # This may only be necessary in cloud servers.
+  echo "Europe/Istanbul" | sudo tee /etc/timezone
+  # Below command didn't reconfigure tzdata but the other one worked:
+  # sudo dpkg-reconfigure tzdata
+  sudo dpkg-reconfigure --frontend noninteractive tzdata
 fi
 
 # sysctl.conf settings
 if [[ $MACHINE == "server" ]]; then
-    echo "Applying sysctl.conf settings..."
-    echo ""
-    echo "
+  echo "Applying sysctl.conf settings..."
+  echo ""
+  echo "
 ################################################################################
 #  http://www.cyberciti.biz/tips/linux-unix-bsd-nginx-webserver-security.html  #
 ################################################################################
@@ -322,32 +323,32 @@ fi
 cd ~ || exit
 
 if [[ $MACHINE == "server" ]]; then
-    echo "Applying ssh server settings..."
-    echo ""
-    if [[ -f /etc/ssh/sshd_config ]]; then
-        sudo sed -i -e "s/#Port 22/Port ${SSHPORT}/g" \
-            -e "s/#AddressFamily any/AddressFamily inet/g" \
-            -e "s/#PubkeyAuthentication yes/PubkeyAuthentication yes/g" \
-            -e "s/#PasswordAuthentication yes/PasswordAuthentication no/g" \
-            -e "s/PermitRootLogin yes/PermitRootLogin no/g" \
-            -e "s/#UseDNS no/UseDNS no/g" \
-            /etc/ssh/sshd_config
+  echo "Applying ssh server settings..."
+  echo ""
+  if [[ -f /etc/ssh/sshd_config ]]; then
+    sudo sed -i -e "s/#Port 22/Port ${SSHPORT}/g" \
+      -e "s/#AddressFamily any/AddressFamily inet/g" \
+      -e "s/#PubkeyAuthentication yes/PubkeyAuthentication yes/g" \
+      -e "s/#PasswordAuthentication yes/PasswordAuthentication no/g" \
+      -e "s/PermitRootLogin yes/PermitRootLogin no/g" \
+      -e "s/#UseDNS no/UseDNS no/g" \
+      /etc/ssh/sshd_config
 
-        sudo systemctl restart ssh
-    fi
+    sudo systemctl restart ssh
+  fi
 fi
 
 mkdir "$HOME/dotfiles-original"
 cp .bashrc .profile "$HOME/dotfiles-original"
 
 if [[ $MACHINE == "server" ]]; then
-    # Check these permissions from sshkeygen.io
-    # Remember to chmod if you restore your backup keys
-    # chmod 0600 $HOME/.ssh/private_key
-    [ -d "$HOME/.ssh" ] || mkdir "$HOME/.ssh"
-    chmod 0700 "$HOME/.ssh"
-    touch "$HOME/.ssh/authorized_keys"
-    chmod 0600 "$HOME/.ssh/authorized_keys"
+  # Check these permissions from sshkeygen.io
+  # Remember to chmod if you restore your backup keys
+  # chmod 0600 $HOME/.ssh/private_key
+  [ -d "$HOME/.ssh" ] || mkdir "$HOME/.ssh"
+  chmod 0700 "$HOME/.ssh"
+  touch "$HOME/.ssh/authorized_keys"
+  chmod 0600 "$HOME/.ssh/authorized_keys"
 fi
 
 # NOTICE: Nearly 2GB swap is enabled by default in Ubuntu server.
@@ -360,12 +361,12 @@ fi
 echo "Creating necessary HOME directories..."
 echo ""
 mkdir -p "$HOME/bin" \
-    "$HOME/.local/share/psysh" \
-    "$HOME/repos" \
-    "$HOME/.npm-global" \
-    "$HOME/.vim-git-backups" \
-    "$HOME/sites" \
-    "$HOME/.composer"
+  "$HOME/.local/share/psysh" \
+  "$HOME/repos" \
+  "$HOME/.npm-global" \
+  "$HOME/.vim-git-backups" \
+  "$HOME/sites" \
+  "$HOME/.composer"
 
 # renameutils: Provides imv that can rename files with long names easily.
 # mtr-tiny: Interactive traceroute alternative.
@@ -391,39 +392,39 @@ mkdir -p "$HOME/bin" \
 
 # Default common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
-    python3-pip xsel mtr-tiny pydf bashtop tmux \
-    build-essential libssl-dev cmake pkg-config \
-    zip unzip autojump highlight par xclip \
-    ncdu htop vnstat vnstati iftop mosh ranger httpie \
-    lnav atool silversearcher-ag lynx multitail \
-    shellcheck sqlite3 dnstop libpcap-dev libncurses5-dev \
-    libsqlite3-dev autoconf secure-delete \
-    curl stow dnsutils gawk mediainfo rlwrap ppa-purge \
-    apache2-utils ntpdate watchman incron hey \
-    renameutils libncurses5 gdebi-core mailutils postfix- \
-    iotop lshw hwinfo pv libnss3-tools jq chkservice \
-    optipng pngquant jpegoptim imagemagick bat ripgrep pigz \
-    glances smem surfraw sxiv bmon cmatrix timg chafa tty-clock
+  python3-pip xsel mtr-tiny pydf bashtop tmux \
+  build-essential libssl-dev cmake pkg-config \
+  zip unzip autojump highlight par xclip \
+  ncdu htop vnstat vnstati iftop mosh ranger httpie \
+  lnav atool silversearcher-ag lynx multitail \
+  shellcheck sqlite3 dnstop libpcap-dev libncurses5-dev \
+  libsqlite3-dev autoconf secure-delete \
+  curl stow dnsutils gawk mediainfo rlwrap ppa-purge \
+  apache2-utils ntpdate watchman incron hey \
+  renameutils libncurses5 gdebi-core mailutils postfix- \
+  iotop lshw hwinfo pv libnss3-tools jq chkservice \
+  optipng pngquant jpegoptim imagemagick bat ripgrep pigz \
+  glances smem surfraw sxiv bmon cmatrix timg chafa tty-clock
 
 pip install --user tmuxp
 
 if [[ $MACHINE == "server" ]]; then
-    echo "Configuring ntpdate..."
-    echo ""
-    sudo chmod u+s /usr/sbin/ntpdate
-    ntpdate -u ntp.ubuntu.com
+  echo "Configuring ntpdate..."
+  echo ""
+  sudo chmod u+s /usr/sbin/ntpdate
+  ntpdate -u ntp.ubuntu.com
 fi
 
 # Install nginx and PHP from ondrej PPA
 echo "Installing Nginx with PHP support..."
 echo ""
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
-    nginx libnginx-mod-http-cache-purge php-fpm php-cli \
-    php-pgsql php-sqlite3 php-gd php-curl php-memcached \
-    php-mysql php-mbstring php-tidy php-xml php-bcmath php-soap \
-    php-intl php-readline php-imagick php-msgpack php-igbinary \
-    php-dev php-zip php-imap php-gmp php-redis php-apcu phpunit \
-    php-yaml
+  nginx libnginx-mod-http-cache-purge php-fpm php-cli \
+  php-pgsql php-sqlite3 php-gd php-curl php-memcached \
+  php-mysql php-mbstring php-tidy php-xml php-bcmath php-soap \
+  php-intl php-readline php-imagick php-msgpack php-igbinary \
+  php-dev php-zip php-imap php-gmp php-redis php-apcu phpunit \
+  php-yaml
 
 # PHP 7.4 packages
 # sudo NEEDRESTART_SUSPEND=1 apt install \
@@ -438,33 +439,33 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
 # valet use default
 
 phpfpmversion=$(
-    php -r "printf('%d.%d', PHP_MAJOR_VERSION, PHP_MINOR_VERSION);"
+  php -r "printf('%d.%d', PHP_MAJOR_VERSION, PHP_MINOR_VERSION);"
 )
 
 # https://www.nginx.com/resources/wiki/start/topics/recipes/wordpress/
 if [[ -f "/etc/php/${phpfpmversion}/fpm/php.ini" ]]; then
-    sudo sed -i -e 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g' \
-        "/etc/php/${phpfpmversion}/fpm/php.ini"
+  sudo sed -i -e 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g' \
+    "/etc/php/${phpfpmversion}/fpm/php.ini"
 fi
 
 if [[ $MACHINE == "server" ]]; then
-    # php.ini production settings
-    if [[ -f "/etc/php/${phpfpmversion}/fpm/php.ini" ]]; then
-        sudo sed -i -e 's/;realpath_cache_ttl = 120/realpath_cache_ttl = 300/g' \
-            -e 's/upload_max_filesize = 2M/upload_max_filesize = 50M/g' \
-            -e 's/post_max_size = 8M/post_max_size = 55M/g' \
-            -e 's/;error_log = syslog/error_log = \/tmp\/php_error.log/g' \
-            -e 's/;date.timezone =/date.timezone = Europe\/Istanbul/g' \
-            "/etc/php/${phpfpmversion}/fpm/php.ini"
-    fi
+  # php.ini production settings
+  if [[ -f "/etc/php/${phpfpmversion}/fpm/php.ini" ]]; then
+    sudo sed -i -e 's/;realpath_cache_ttl = 120/realpath_cache_ttl = 300/g' \
+      -e 's/upload_max_filesize = 2M/upload_max_filesize = 50M/g' \
+      -e 's/post_max_size = 8M/post_max_size = 55M/g' \
+      -e 's/;error_log = syslog/error_log = \/tmp\/php_error.log/g' \
+      -e 's/;date.timezone =/date.timezone = Europe\/Istanbul/g' \
+      "/etc/php/${phpfpmversion}/fpm/php.ini"
+  fi
 
-    if [[ ! -f "/etc/php/${phpfpmversion}/fpm/conf.d/10-opcache.ini" ]]; then
-        sudo phpenmod -v "$phpfpmversion" -s fpm opcache
-    fi
+  if [[ ! -f "/etc/php/${phpfpmversion}/fpm/conf.d/10-opcache.ini" ]]; then
+    sudo phpenmod -v "$phpfpmversion" -s fpm opcache
+  fi
 
-    if [[ -f "/etc/php/${phpfpmversion}/fpm/conf.d/10-opcache.ini" ]]; then
-        echo "Applying PHP Opcache settings."
-        echo "
+  if [[ -f "/etc/php/${phpfpmversion}/fpm/conf.d/10-opcache.ini" ]]; then
+    echo "Applying PHP Opcache settings."
+    echo "
 
 opcache.memory_consumption=128
 
@@ -490,21 +491,21 @@ opcache.save_comments=1
 ; https://tideways.io/profiler/blog/fine-tune-your-opcache-configuration-to-avoid-caching-suprises
 opcache.max_wasted_percentage=10
 " | sudo tee -a "/etc/php/${phpfpmversion}/fpm/conf.d/10-opcache.ini"
-    fi
+  fi
 fi
 
 # Create separate user with non login shell to be the owner of /var/www
 if [[ $MACHINE == "server" ]]; then
-    sudo adduser webu --shell=/bin/false --disabled-login \
-        --disabled-password --gecos ""
+  sudo adduser webu --shell=/bin/false --disabled-login \
+    --disabled-password --gecos ""
 
-    if [[ -d /var/www ]]; then
-        sudo chown webu:webu /var/www
-    fi
+  if [[ -d /var/www ]]; then
+    sudo chown webu:webu /var/www
+  fi
 
-    sudo -u webu git config --global user.name "$GITUSERNAME"
-    sudo -u webu git config --global user.email "$GITEMAIL"
-    sudo -u webu git config --global core.editor vim
+  sudo -u webu git config --global user.name "$GITUSERNAME"
+  sudo -u webu git config --global user.email "$GITEMAIL"
+  sudo -u webu git config --global core.editor vim
 fi
 
 # Install Vim PPA way which is updated daily.
@@ -523,47 +524,47 @@ sudo update-alternatives --install /usr/bin/vi vi "$VIM" 1
 sudo update-alternatives --set vi "$VIM"
 
 if [[ $MACHINE == "server" ]]; then
-    echo "Installing certbot..."
-    echo ""
-    sudo NEEDRESTART_SUSPEND=1 apt install -y certbot python3-certbot-nginx
+  echo "Installing certbot..."
+  echo ""
+  sudo NEEDRESTART_SUSPEND=1 apt install -y certbot python3-certbot-nginx
 fi
 
 echo "Installing cheat.sh CLI client..."
-curl -s https://cht.sh/:cht.sh > "$HOME/bin/cht.sh" && chmod +x "$HOME/bin/cht.sh"
+curl -s https://cht.sh/:cht.sh >"$HOME/bin/cht.sh" && chmod +x "$HOME/bin/cht.sh"
 
 echo "Installing tealdeer: tldr rust implementation..."
 LATEST=$(get_latest_release "dbrgn/tealdeer")
 wget -qO "$HOME/bin/tldr" \
-    "https://github.com/dbrgn/tealdeer/releases/download/$LATEST/tealdeer-linux-x86_64-musl" && \
-    chmod +x "$HOME/bin/tldr"
+  "https://github.com/dbrgn/tealdeer/releases/download/$LATEST/tealdeer-linux-x86_64-musl" &&
+  chmod +x "$HOME/bin/tldr"
 
 echo "Installing nettop: bandwidth usage by process..."
-git clone --quiet "https://github.com/Emanem/nettop.git" "$HOME/repos/nettop" && \
-cd "$HOME/repos/nettop" && make release && cp ./nettop "$HOME/bin" && cd "$HOME" || exit
+git clone --quiet "https://github.com/Emanem/nettop.git" "$HOME/repos/nettop" &&
+  cd "$HOME/repos/nettop" && make release && cp ./nettop "$HOME/bin" && cd "$HOME" || exit
 
 echo "Adding php support for ctags..."
 wget -qO "$HOME/bin/phpctags" \
-    "https://raw.githubusercontent.com/vim-php/phpctags/gh-pages/install/phpctags.phar" \
-    && chmod +x "$HOME/bin/phpctags"
+  "https://raw.githubusercontent.com/vim-php/phpctags/gh-pages/install/phpctags.phar" &&
+  chmod +x "$HOME/bin/phpctags"
 
 echo "Installing universal ctags..."
 # This is also installable from package managers.
-git clone --quiet "https://github.com/universal-ctags/ctags.git" "$HOME/repos/ctags" && \
-    cd "$HOME/repos/ctags" && ./autogen.sh && ./configure && make -j2 && \
-    sudo make install && cd "$HOME" || exit
+git clone --quiet "https://github.com/universal-ctags/ctags.git" "$HOME/repos/ctags" &&
+  cd "$HOME/repos/ctags" && ./autogen.sh && ./configure && make -j2 &&
+  sudo make install && cd "$HOME" || exit
 
 # PHP Documentation inside psysh using "doc array_push" for example
 wget -qO "$HOME/.local/share/psysh/php_manual.sqlite" \
-    "http://psysh.org/manual/en/php_manual.sqlite"
+  "http://psysh.org/manual/en/php_manual.sqlite"
 
 echo "Installing wpcli (PHAR Way)..."
 curl -O \
-    "https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar" && \
-    chmod +x wp-cli.phar && sudo mv wp-cli.phar /usr/local/bin/wp
+  "https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar" &&
+  chmod +x wp-cli.phar && sudo mv wp-cli.phar /usr/local/bin/wp
 
 echo "Installing composer..."
-php -r "readfile('http://getcomposer.org/installer');" \
-    | sudo php -- --install-dir=/usr/bin/ --filename=composer
+php -r "readfile('http://getcomposer.org/installer');" |
+  sudo php -- --install-dir=/usr/bin/ --filename=composer
 
 composer config --global github-oauth.github.com "$GHTOKEN"
 composer config --global repo.packagist composer https://packagist.org
@@ -573,12 +574,12 @@ echo "Installing composer global packages"
 # repman-io/composer-plugin will provide CDN support for php packages.
 # gordalina/cachetool opcache reset tool
 composer g require --quiet "squizlabs/php_codesniffer=*" \
-"psy/psysh:@stable" \
-mnapoli/pretty \
-seld/jsonlint \
-friendsofphp/php-cs-fixer \
-gordalina/cachetool \
-repman-io/composer-plugin
+  "psy/psysh:@stable" \
+  mnapoli/pretty \
+  seld/jsonlint \
+  friendsofphp/php-cs-fixer \
+  gordalina/cachetool \
+  repman-io/composer-plugin
 
 echo "Installing wp cli admin command..."
 # This allows you to open site in your browser.
@@ -591,11 +592,11 @@ wp --quiet package install git@github.com:igorhrcek/wp-cli-secure-command.git
 # https://github.com/nodesource/distributions/blob/master/README.md#debinstall
 echo "Installing NodeJS and yarn..."
 echo ""
-curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg \
-    | gpg --dearmor | sudo tee /usr/share/keyrings/yarnkey.gpg >/dev/null
+curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg |
+  gpg --dearmor | sudo tee /usr/share/keyrings/yarnkey.gpg >/dev/null
 echo \
-    "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" \
-    | sudo tee /etc/apt/sources.list.d/yarn.list
+  "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" |
+  sudo tee /etc/apt/sources.list.d/yarn.list
 curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 # Above command updates the apt db.
 sudo NEEDRESTART_SUSPEND=1 apt install -y nodejs yarn
@@ -633,10 +634,10 @@ git clone -b master https://github.com/WordPress/WordPress-Coding-Standards.git 
 echo "Installing fd-find..."
 # This is for speeding up fuzzy search in ranger,
 # as it is using fzf with 'find' command.
-LATEST=$( get_latest_release "sharkdp/fd" )
+LATEST=$(get_latest_release "sharkdp/fd")
 cd ~ || exit
 wget -qO "$HOME/fd.deb" \
-    "https://github.com/sharkdp/fd/releases/download/$LATEST/fd_$( echo "$LATEST" | tr -d 'v' )_amd64.deb"
+  "https://github.com/sharkdp/fd/releases/download/$LATEST/fd_$(echo "$LATEST" | tr -d 'v')_amd64.deb"
 sudo dpkg -i "fd.deb"
 rm -f fd.deb
 
@@ -649,29 +650,29 @@ rm -f fd.deb
 # sudo dpkg -i "ripgrep_${LATEST}_amd64.deb"
 
 echo "Installing bandwhich - monitor network bandwidth by process..."
-LATEST=$( get_latest_release "imsnif/bandwhich" )
+LATEST=$(get_latest_release "imsnif/bandwhich")
 cd ~ || exit
 wget -qO "$HOME/bandwhich.tar.gz" \
-    "https://github.com/imsnif/bandwhich/releases/download/$LATEST/bandwhich-v$( echo "$LATEST" | tr -d 'v' )-x86_64-unknown-linux-musl.tar.gz"
-aunpack bandwhich.tar.gz && mv bandwhich ~/bin \
-    && rm -f bandwhich.tar.gz
+  "https://github.com/imsnif/bandwhich/releases/download/$LATEST/bandwhich-v$(echo "$LATEST" | tr -d 'v')-x86_64-unknown-linux-musl.tar.gz"
+aunpack bandwhich.tar.gz && mv bandwhich ~/bin &&
+  rm -f bandwhich.tar.gz
 
 echo "Installing glow (Markdown viewer)..."
-LATEST=$( get_latest_release "charmbracelet/glow" )
+LATEST=$(get_latest_release "charmbracelet/glow")
 cd ~ || exit
 wget -qO "$HOME/glow.deb" \
-    "https://github.com/charmbracelet/glow/releases/download/$LATEST/glow_$( echo "$LATEST" | tr -d 'v' )_linux_amd64.deb"
+  "https://github.com/charmbracelet/glow/releases/download/$LATEST/glow_$(echo "$LATEST" | tr -d 'v')_linux_amd64.deb"
 sudo dpkg -i "glow.deb"
 rm -f glow.deb
 
 echo "Installing piknik - clipboard over network..."
 if [[ $MACHINE == "server" ]]; then
-    LATEST=$( get_latest_release "jedisct1/piknik" )
-    cd ~ || exit
-    wget -qO "$HOME/piknik.tar.gz" \
-        "https://github.com/jedisct1/piknik/releases/download/$LATEST/piknik-linux_x86_64-$( echo "$LATEST" | tr -d 'v' ).tar.gz"
-    aunpack piknik.tar.gz && mv linux-x86_64/piknik ~/bin && rm -rf linux-x86_64 && rm -f piknik.tar.gz
-    echo "\
+  LATEST=$(get_latest_release "jedisct1/piknik")
+  cd ~ || exit
+  wget -qO "$HOME/piknik.tar.gz" \
+    "https://github.com/jedisct1/piknik/releases/download/$LATEST/piknik-linux_x86_64-$(echo "$LATEST" | tr -d 'v').tar.gz"
+  aunpack piknik.tar.gz && mv linux-x86_64/piknik ~/bin && rm -rf linux-x86_64 && rm -f piknik.tar.gz
+  echo "\
 [Unit]
 Description=Piknik - clipboard over network
 After=network.target
@@ -686,11 +687,30 @@ Restart=on-abort
 [Install]
 WantedBy=multi-user.target" | sudo tee /etc/systemd/system/piknik.service
 
-    # TODO: Before running piknik you need to generate ~/.piknik.toml files using
-    # piknik -genkey -password
-    # sudo service piknik start
-    # sudo systemctl enable piknik.service
+  # TODO: Before running piknik you need to generate ~/.piknik.toml files using
+  # piknik -genkey -password
+  # sudo service piknik start
+  # sudo systemctl enable piknik.service
 fi
+
+# Install lf file manager
+# TODO: This can be in official repos by the next time you install Ubuntu
+echo "Installing lf - ranger file manager alternative written in Go"
+LATEST=$(get_latest_release "gokcehan/lf")
+cd ~ || exit
+wget -qO "$HOME/lf.tar.gz" \
+  "https://github.com/gokcehan/lf/releases/download/$LATEST/lf-linux-amd64.tar.gz"
+aunpack lf.tar.gz && chmod +x "$HOME/lf" && sudo mv lf /usr/local/bin && rm -f lf.tar.gz
+
+# Install pistol
+echo "Installing pistol - cmd previewer like ranger's scrop.sh written in Go"
+LATEST=$(get_latest_release "doronbehar/pistol")
+cd ~ || exit
+wget -qO "$HOME/pistol" \
+  "https://github.com/doronbehar/pistol/releases/download/$LATEST/pistol"
+chmod +x "$HOME/pistol"
+sudo mv pistol /usr/local/bin && rm -f "$HOME/pistol"
+exit
 
 # Install vim-node-rpc
 yarn global add vim-node-rpc
@@ -706,8 +726,8 @@ git config --global init.defaultBranch main
 
 # Don't require password for these executables.
 echo \
-    "$(whoami) ALL=NOPASSWD: /usr/sbin/iftop, /usr/bin/dnstop, /usr/sbin/iotop, /home/$(whoami)/repos/nettop/nettop" \
-    | sudo EDITOR='tee -a' visudo
+  "$(whoami) ALL=NOPASSWD: /usr/sbin/iftop, /usr/bin/dnstop, /usr/sbin/iotop, /home/$(whoami)/repos/nettop/nettop" |
+  sudo EDITOR='tee -a' visudo
 echo "Defaults:$(whoami) timestamp_timeout=30" | sudo EDITOR='tee -a' visudo
 
 curl -sS https://starship.rs/install.sh | sh -s -- -y
@@ -715,7 +735,7 @@ curl -sS https://starship.rs/install.sh | sh -s -- -y
 echo "Installing dotfiles..."
 echo ""
 git clone --quiet --separate-git-dir="$HOME/.dotfiles" \
-    "git@gitlab.com:tricarte/dotfiles_ng.git" tmpdotfiles
+  "git@gitlab.com:tricarte/dotfiles_ng.git" tmpdotfiles
 rsync --recursive --verbose --exclude '.git' tmpdotfiles/ "$HOME/"
 rm -r tmpdotfiles
 
@@ -724,7 +744,7 @@ source "$HOME/.bashrc"
 
 # Copy tmuxp config from dotfiles-templates to ~/.tmuxp/
 if [[ ! -d "$HOME/.tmuxp" ]]; then
-    mkdir "$HOME/.tmuxp"
+  mkdir "$HOME/.tmuxp"
 fi
 
 cp "$HOME/dotfiles-templates/tmuxp/mytmux.yaml" "$HOME/.tmuxp"
@@ -741,12 +761,12 @@ sed -i -e "s:change_me:$(whoami):g" "$HOME/.local/share/ranger/bookmarks"
 echo "Configuring git for dotfiles..."
 echo ""
 git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" config \
-    --local status.showUntrackedFiles no
+  --local status.showUntrackedFiles no
 # Switch from http to ssh for gitlab authentication.
 git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" remote \
-    set-url origin git@gitlab.com:tricarte/dotfiles_ng.git
+  set-url origin git@gitlab.com:tricarte/dotfiles_ng.git
 git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" config \
-    core.sshCommand "ssh -o IdentitiesOnly=yes -i ~/.ssh/github-id_rsa -F /dev/null"
+  core.sshCommand "ssh -o IdentitiesOnly=yes -i ~/.ssh/github-id_rsa -F /dev/null"
 
 # Install Mariadb
 echo "Installing MariaDB..."
@@ -764,10 +784,10 @@ sudo NEEDRESTART_SUSPEND=1 apt install mariadb-server mariadb-client -y
 # GRANT ALL ON *.* TO 'admin'@'localhost' IDENTIFIED BY 'password' WITH GRANT OPTION;
 # FLUSH PRIVILEGES;
 if [[ $MACHINE == "server" ]]; then
-    sudo mariadb -e"GRANT ALL ON *.* TO 'admin'@'localhost' \
+  sudo mariadb -e"GRANT ALL ON *.* TO 'admin'@'localhost' \
         IDENTIFIED BY '${DBPASSWORD}' WITH GRANT OPTION; FLUSH PRIVILEGES;"
 else
-    sudo mariadb -e"GRANT ALL ON *.* TO 'admin'@'localhost' \
+  sudo mariadb -e"GRANT ALL ON *.* TO 'admin'@'localhost' \
         IDENTIFIED BY 'password' WITH GRANT OPTION; FLUSH PRIVILEGES;"
 fi
 
@@ -850,64 +870,63 @@ sudo sed -i -e 's/#SystemMaxUse=/SystemMaxUse=100M/g' /etc/systemd/journald.conf
 
 # Install all desktop applications
 if [[ $MACHINE == "desktop" ]]; then
-    # TODO: After installation notes:
-    # Add below repo URL to Discover after installing plasma-discover-backend-flatpak.
-    # https://flathub.org/repo/flathub.flatpakrepo
+  # TODO: After installation notes:
+  # Add below repo URL to Discover after installing plasma-discover-backend-flatpak.
+  # https://flathub.org/repo/flathub.flatpakrepo
 
-# ppa:graphics-drivers/ppa : Latest NVIDIA drivers
-# ppa:maarten-baert/simplescreenrecorder" # This PPA does not exist for 2204
-# ppa:kisak/kisak-mesa: Latest stable Mesa drivers
-# ppa:wereturtle/ppa: ghostwriter markdown editor
-    PPAS=(
-        "ppa:kisak/kisak-mesa"
-        "ppa:mkusb/ppa"
-        "ppa:savoury1/gimp"
-        "ppa:kdenlive/kdenlive-stable"
-        "ppa:slgobinath/safeeyes"
-        "ppa:jonmagon/kdiskmark"
-        "ppa:graphics-drivers/ppa"
-        "ppa:libreoffice/ppa"
-        "ppa:wereturtle/ppa"
-    )
+  # ppa:graphics-drivers/ppa : Latest NVIDIA drivers
+  # ppa:maarten-baert/simplescreenrecorder" # This PPA does not exist for 2204
+  # ppa:kisak/kisak-mesa: Latest stable Mesa drivers
+  # ppa:wereturtle/ppa: ghostwriter markdown editor
+  PPAS=(
+    "ppa:kisak/kisak-mesa"
+    "ppa:mkusb/ppa"
+    "ppa:savoury1/gimp"
+    "ppa:kdenlive/kdenlive-stable"
+    "ppa:slgobinath/safeeyes"
+    "ppa:jonmagon/kdiskmark"
+    "ppa:graphics-drivers/ppa"
+    "ppa:libreoffice/ppa"
+    "ppa:wereturtle/ppa"
+  )
 
-    echo "Adding necessary PPAs for the desktop..."
-    echo ""
-    for ppa in "${PPAS[@]}"
-    do
-        sudo add-apt-repository -y "$ppa" -n
-    done
+  echo "Adding necessary PPAs for the desktop..."
+  echo ""
+  for ppa in "${PPAS[@]}"; do
+    sudo add-apt-repository -y "$ppa" -n
+  done
 
-    sudo apt update -y && sudo apt upgrade -y
+  sudo apt update -y && sudo apt upgrade -y
 
-    # ubuntu-restricted-addons: For Intel Quick Sync accelerated video encoding in Kdenlive
-    # feh: Fast image file viewer
-    # dnsmasq: For valet-linux
-    # barrier: Synergy alternative
-    # appmenu-gtk2-module appmenu-gtk3-module: Global menu in KDE.
-    # libstartup-notification0: To get rid of a warning message that kitty
-    # terminal emulator gives when using 'kitty launch'
-    echo "Installing desktop related apps..."
-    echo ""
-    sudo NEEDRESTART_SUSPEND=1 apt install -y \
-        adb fastboot appmenu-gtk2-module appmenu-gtk3-module \
-        barrier dnsmasq feh plasma-discover-backend-flatpak \
-        gimp gimp-gap gimp-gmic gimp-lensfun gimp-texturize \
-        glmark2 kdenlive mkusb mkusb-nox usb-pack-efi \
-        safeeyes simplescreenrecorder sqlitebrowser zeal \
-        ubuntu-restricted-addons filelight libnotify-bin \
-        ghostwriter libstartup-notification0
+  # ubuntu-restricted-addons: For Intel Quick Sync accelerated video encoding in Kdenlive
+  # feh: Fast image file viewer
+  # dnsmasq: For valet-linux
+  # barrier: Synergy alternative
+  # appmenu-gtk2-module appmenu-gtk3-module: Global menu in KDE.
+  # libstartup-notification0: To get rid of a warning message that kitty
+  # terminal emulator gives when using 'kitty launch'
+  echo "Installing desktop related apps..."
+  echo ""
+  sudo NEEDRESTART_SUSPEND=1 apt install -y \
+    adb fastboot appmenu-gtk2-module appmenu-gtk3-module \
+    barrier dnsmasq feh plasma-discover-backend-flatpak \
+    gimp gimp-gap gimp-gmic gimp-lensfun gimp-texturize \
+    glmark2 kdenlive mkusb mkusb-nox usb-pack-efi \
+    safeeyes simplescreenrecorder sqlitebrowser zeal \
+    ubuntu-restricted-addons filelight libnotify-bin \
+    ghostwriter libstartup-notification0
 
-        # Install MailHog
-        # Manually running: ~/go/bin/MailHog
-        # the HTTP server starts on port 8025
-        # go get github.com/mailhog/MailHog
-        echo "Installing MailHog..."
-        LATEST=$(get_latest_release "mailhog/MailHog")
-        wget -qO "$HOME/bin/MailHog" \
-            "https://github.com/mailhog/MailHog/releases/download/${LATEST}/MailHog_linux_amd64" \
-            && chmod +x "$HOME/bin/MailHog" && sudo mv "$HOME/bin/MailHog" /usr/local/bin/MailHog
+  # Install MailHog
+  # Manually running: ~/go/bin/MailHog
+  # the HTTP server starts on port 8025
+  # go get github.com/mailhog/MailHog
+  echo "Installing MailHog..."
+  LATEST=$(get_latest_release "mailhog/MailHog")
+  wget -qO "$HOME/bin/MailHog" \
+    "https://github.com/mailhog/MailHog/releases/download/${LATEST}/MailHog_linux_amd64" &&
+    chmod +x "$HOME/bin/MailHog" && sudo mv "$HOME/bin/MailHog" /usr/local/bin/MailHog
 
-        sudo tee /etc/systemd/system/mailhog.service <<EOL
+  sudo tee /etc/systemd/system/mailhog.service <<EOL
 [Unit]
 Description=MailHog Service
 After=network.service
@@ -917,6 +936,18 @@ ExecStart=/usr/bin/env /usr/local/bin/MailHog > /dev/null 2>&1 &
 [Install]
 WantedBy=multi-user.target
 EOL
+
+  # Install dragon drag and drop from local deb
+  echo "Installing dragon - drag and drop sink and source"
+  if [[ -f "$HOME/repos/debs/dragon/dragon-drag-and-drop_1.1.1-1_amd64.deb" ]]; then
+    sudo apt install -y "$HOME/repos/debs/dragon/dragon-drag-and-drop_1.1.1-1_amd64.deb"
+  fi
+  
+  # Install nsxiv image viewer from local deb
+  echo "Installing nsxiv image viewer"
+  if [[ -f "$HOME/repos/debs/nsxiv/nsxiv_30-2_amd64.deb" ]]; then
+    sudo apt install -y "$HOME/repos/debs/nsxiv/nsxiv_30-2_amd64.deb"
+  fi
 
 fi # End of installation of desktop applications
 
@@ -929,7 +960,7 @@ git clone --quiet "https://github.com/tricarte/wpready3" "$HOME/repos/wpready3"
 # Add post-commit hook to run 'composer wpstarter'
 echo "#!/usr/bin/env bash
 export PATH=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin\"
-composer wpstarter" > "$HOME/repos/wpready3/.git/hooks/post-commit"
+composer wpstarter" >"$HOME/repos/wpready3/.git/hooks/post-commit"
 chmod +x "$HOME/repos/wpready3/.git/hooks/post-commit"
 
 chmod +x "$HOME/repos/wpsite/wpsite"
@@ -940,43 +971,43 @@ ln -s "$HOME/repos/wpsite/.wpsite-completion.bash" "$HOME/.wpsite-completion.bas
 
 # Lock root user
 if [[ $MACHINE == "server" ]]; then
-    if [[ 'root' != $(whoami) ]]; then
-        sudo passwd --lock root
-    fi
+  if [[ 'root' != $(whoami) ]]; then
+    sudo passwd --lock root
+  fi
 fi
 
 # Add current user to www-data group
 # This will be useful when using cli applications
 # such as composer, wpcli with www-data owned files and directories.
 if [[ $MACHINE == "server" ]]; then
-    if [[ 'root' != $(whoami) ]]; then
-        # Check www-data group exists
-        getent group www-data > /dev/null 2>&1 
-        if [[ ! $? ]]; then
-            sudo usermod -aG www-data "$(whoami)"
-        fi
-
-        # Also be a member of "webu" group.
-        # This is the group name of the owner of /var/www directory.
-        getent group webu > /dev/null 2>&1 
-        if [[ ! $? ]]; then
-            sudo usermod -aG webu "$(whoami)"
-        fi
+  if [[ 'root' != $(whoami) ]]; then
+    # Check www-data group exists
+    getent group www-data >/dev/null 2>&1
+    if [[ ! $? ]]; then
+      sudo usermod -aG www-data "$(whoami)"
     fi
+
+    # Also be a member of "webu" group.
+    # This is the group name of the owner of /var/www directory.
+    getent group webu >/dev/null 2>&1
+    if [[ ! $? ]]; then
+      sudo usermod -aG webu "$(whoami)"
+    fi
+  fi
 fi
 
 # Install Config Server Firewall - CSF
 # By default it is not activated.
 if [[ $MACHINE == "server" ]]; then
-    echo "Installing Config Server Fireall - CSF"
-    sudo NEEDRESTART_SUSPEND=1 apt install \
-        libwww-perl liblwp-protocol-https-perl libgd-graph-perl -y
-    cd "$HOME/repos" || exit
-    wget -q https://download.configserver.com/csf.tgz
-    tar -xvzf csf.tgz
-    cd csf || exit
-    sudo bash install.sh
-    cd "$HOME" || exit
+  echo "Installing Config Server Fireall - CSF"
+  sudo NEEDRESTART_SUSPEND=1 apt install \
+    libwww-perl liblwp-protocol-https-perl libgd-graph-perl -y
+  cd "$HOME/repos" || exit
+  wget -q https://download.configserver.com/csf.tgz
+  tar -xvzf csf.tgz
+  cd csf || exit
+  sudo bash install.sh
+  cd "$HOME" || exit
 fi
 
 # Not that important: A top like tool for Intel GPUs.
@@ -993,24 +1024,24 @@ fi
 # Install valet-linux
 if [[ $MACHINE == "desktop" ]]; then
 
-    # valet-linux installation may break name resolution
-    # So we first install adminer from internet.
-    echo "Downloading adminer..."
-    echo ""
-    [ -d "$HOME/valet-park/adminer" ] || mkdir -p "$HOME/valet-park/adminer"
-    cd "$HOME/valet-park/adminer" || exit
-    wget -qO index.php "https://www.adminer.org/latest-en.php"
-    wget -q \
-        "https://raw.githubusercontent.com/Niyko/Hydra-Dark-Theme-for-Adminer/master/adminer.css"
-    cd ~ || exit
+  # valet-linux installation may break name resolution
+  # So we first install adminer from internet.
+  echo "Downloading adminer..."
+  echo ""
+  [ -d "$HOME/valet-park/adminer" ] || mkdir -p "$HOME/valet-park/adminer"
+  cd "$HOME/valet-park/adminer" || exit
+  wget -qO index.php "https://www.adminer.org/latest-en.php"
+  wget -q \
+    "https://raw.githubusercontent.com/Niyko/Hydra-Dark-Theme-for-Adminer/master/adminer.css"
+  cd ~ || exit
 
-    composer global require --quiet cpriego/valet-linux
-    "$HOME/.composer/vendor/bin/valet" install
-    if [[ -d "$HOME/valet-park" ]]; then
-        (cd "$HOME/valet-park" && "$HOME/.composer/vendor/bin/valet park")
-    fi
+  composer global require --quiet cpriego/valet-linux
+  "$HOME/.composer/vendor/bin/valet" install
+  if [[ -d "$HOME/valet-park" ]]; then
+    (cd "$HOME/valet-park" && "$HOME/.composer/vendor/bin/valet park")
+  fi
 
-    cat <<EOT >> "/etc/php/${phpfpmversion}/fpm/pool.d/valet.conf"
+  cat <<EOT >>"/etc/php/${phpfpmversion}/fpm/pool.d/valet.conf"
 ; Memory limit 1G
 php_value[memory_limit] =1073741824
 php_value[post_max_size] =100M
@@ -1052,63 +1083,71 @@ env[ADMINER_PASSWORD] = password
 
 EOT
 
-    if [[ -f /etc/nginx/sites-available/valet.conf ]]; then
-        if ! grep -q client_max_body_size /etc/nginx/sites-available/valet.conf; then
-            sudo sed -i -e "/charset.*/a client_max_body_size 1500M;" \
-                /etc/nginx/sites-available/valet.conf
-            sudo sed -i -e "/default_server;$/c\    localhost 80 default_server;" \
-                /etc/nginx/sites-available/valet.conf
-        fi
+  if [[ -f /etc/nginx/sites-available/valet.conf ]]; then
+    if ! grep -q client_max_body_size /etc/nginx/sites-available/valet.conf; then
+      sudo sed -i -e "/charset.*/a client_max_body_size 1500M;" \
+        /etc/nginx/sites-available/valet.conf
+      sudo sed -i -e "/default_server;$/c\    localhost 80 default_server;" \
+        /etc/nginx/sites-available/valet.conf
     fi
+  fi
 
-    "$HOME/.composer/vendor/bin/valet" domain test
-    # Below is the manual version of the command above.
-    # if [[ -f /etc/dnsmasq.d/valet ]]; then
-    #     echo "address=/.test/127.0.0.1" | sudo tee /etc/dnsmasq.d/valet
-    # fi
+  "$HOME/.composer/vendor/bin/valet" domain test
+  # Below is the manual version of the command above.
+  # if [[ -f /etc/dnsmasq.d/valet ]]; then
+  #     echo "address=/.test/127.0.0.1" | sudo tee /etc/dnsmasq.d/valet
+  # fi
 
-    # This may make dns resolution slow, so it is disabled
-    # Upstream dns server setting for dnsmasq.
-    # echo "server=9.9.9.9" | sudo tee /etc/dnsmasq.d/server
+  # This may make dns resolution slow, so it is disabled
+  # Upstream dns server setting for dnsmasq.
+  # echo "server=9.9.9.9" | sudo tee /etc/dnsmasq.d/server
 
-    # You may need to modify this file after valet installation.
-    # /etc/nginx/sites-available/valet.conf
-    # listen 80 default_server;
+  # You may need to modify this file after valet installation.
+  # /etc/nginx/sites-available/valet.conf
+  # listen 80 default_server;
 
-    sudo systemctl restart dnsmasq.service
+  sudo systemctl restart dnsmasq.service
 
-    # Create valet config from template
-    mv "$HOME/.valet/config.json" "$HOME/.valet/config.json.orj"
-    cp "$HOME/dotfiles-templates/valet/config.json" "$HOME/.valet/config.json"
-    sed -i -e "s:change_me:$(whoami):g" "$HOME/.valet/config.json"
+  # Create valet config from template
+  mv "$HOME/.valet/config.json" "$HOME/.valet/config.json.orj"
+  cp "$HOME/dotfiles-templates/valet/config.json" "$HOME/.valet/config.json"
+  sed -i -e "s:change_me:$(whoami):g" "$HOME/.valet/config.json"
 
-    if ! ping -c1 google.com > /dev/null 2>&1; then
-        echo "Name resolution is broken."
-        echo "Installation of valet-linux may have broken name resolution."
-    fi
+  if ! ping -c1 google.com >/dev/null 2>&1; then
+    echo "Name resolution is broken."
+    echo "Installation of valet-linux may have broken name resolution."
+  fi
 fi
 
 # Install veracrypt
 if [[ $MACHINE == "desktop" ]]; then
-    url="https://launchpad.net/veracrypt/trunk/"
-    response=$(lynx -dump $url)
-    vc_version=$(echo "$response" | grep "Latest version is" | tr -s ' ' | cut -d" " -f5)
-    ubuntu_version=$(lsb_release -rs)
-    download_url="https://launchpad.net/veracrypt/trunk/${vc_version}/+download/veracrypt-${vc_version}-Ubuntu-${ubuntu_version}-amd64.deb"
+  url="https://launchpad.net/veracrypt/trunk/"
+  response=$(lynx -dump $url)
+  vc_version=$(echo "$response" | grep "Latest version is" | tr -s ' ' | cut -d" " -f5)
+  ubuntu_version=$(lsb_release -rs)
+  download_url="https://launchpad.net/veracrypt/trunk/${vc_version}/+download/veracrypt-${vc_version}-Ubuntu-${ubuntu_version}-amd64.deb"
 
-    echo "Downloading veracrypt from Launchpad..."
-    wget -qO "$HOME/veracrypt.deb" "$download_url"
+  echo "Downloading veracrypt from Launchpad..."
+  wget -qO "$HOME/veracrypt.deb" "$download_url"
 
-    if [[ -f "$HOME/veracrypt.deb" ]]; then
-        sudo apt instal -y "$HOME/veracrypt.deb"
-    else
-        echo "Could not download veracrypt!"
-        echo "The url was: ${download_url}."
-    fi
+  if [[ -f "$HOME/veracrypt.deb" ]]; then
+    sudo apt instal -y "$HOME/veracrypt.deb"
+  else
+    echo "Could not download veracrypt!"
+    echo "The url was: ${download_url}."
+  fi
+fi
+
+if [[ -f "$HOME/bin/unmount-usb-drives" ]]; then
+  if [[ ! -d "$HOME/.config/plasma-workspace/shutdown" ]]; then
+    mkdir -p "$HOME/.config/plasma-workspace/shutdown"
+  fi
+  ln -s "$HOME/bin/unmount-usb-drives" \
+    "$HOME/.config/plasma-workspace/shutdown/unmount-usb-drives"
 fi
 
 end=$SECONDS
-echo "Installation took $((end-start)) seconds to finish."
+echo "Installation took $((end - start)) seconds to finish."
 echo "Will reboot in 3 seconds..."
 sleep 3
 # FIXME: would you like to reboot now
@@ -1144,9 +1183,9 @@ sudo reboot
 # TODO: Change /etc/vnstat.conf interface name using GWIFACE. vnstat auto detects the
 # outgoing interface. This is probably necessary for php-vnstat thing.
 # TODO: apticron thing.
-# TODO: You may consider disabling motd dynamic news. 
-    # vim /etc/default/motd-news:
-    # ENABLED=0
+# TODO: You may consider disabling motd dynamic news.
+# vim /etc/default/motd-news:
+# ENABLED=0
 # TODO: https://github.com/meesaltena/SSHHeatmap
 # TODO: Is nginx installed disabled?
 # TODO: https://github.com/vinceliuice/grub2-themes Use "tela" theme.
@@ -1193,4 +1232,3 @@ EOS
 #     Port portNumber
 #     IdentityFile ~/.ssh/private-key-file
 #     IdentitiesOnly yes
-
