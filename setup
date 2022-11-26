@@ -618,7 +618,8 @@ echo ""
 npm install --global intelephense
 
 # starship.rs: a shell prompt customized for git repos
-curl -sS https://starship.rs/install.sh | sh
+echo "Installing starship - cli prompt"
+curl -sS https://starship.rs/install.sh | sh -s -- -y
 
 # markdownlint
 echo "Installing markdownlint"
@@ -729,8 +730,6 @@ echo \
   "$(whoami) ALL=NOPASSWD: /usr/sbin/iftop, /usr/bin/dnstop, /usr/sbin/iotop, /home/$(whoami)/repos/nettop/nettop" |
   sudo EDITOR='tee -a' visudo
 echo "Defaults:$(whoami) timestamp_timeout=30" | sudo EDITOR='tee -a' visudo
-
-curl -sS https://starship.rs/install.sh | sh -s -- -y
 
 echo "Installing dotfiles..."
 echo ""
