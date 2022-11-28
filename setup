@@ -389,6 +389,7 @@ mkdir -p "$HOME/bin" \
 # cmatrix: Guess what
 # timg: Terminal image viwer
 # chafa: Terminal image viwer. Seems a little bit faster than timg.
+# moreutils: for vidir: bulk rename with vim.
 
 # Default common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -398,7 +399,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
   ncdu htop vnstat vnstati iftop mosh ranger httpie \
   lnav atool silversearcher-ag lynx multitail \
   shellcheck sqlite3 dnstop libpcap-dev libncurses5-dev \
-  libsqlite3-dev autoconf secure-delete \
+  libsqlite3-dev autoconf secure-delete moreutils \
   curl stow dnsutils gawk mediainfo rlwrap ppa-purge \
   apache2-utils ntpdate watchman incron hey \
   renameutils libncurses5 gdebi-core mailutils postfix- \
