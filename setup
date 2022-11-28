@@ -390,6 +390,7 @@ mkdir -p "$HOME/bin" \
 # timg: Terminal image viwer
 # chafa: Terminal image viwer. Seems a little bit faster than timg.
 # moreutils: for vidir: bulk rename with vim.
+# cloc: statistics such as number of lines of a code file
 
 # Default common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -401,7 +402,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
   shellcheck sqlite3 dnstop libpcap-dev libncurses5-dev \
   libsqlite3-dev autoconf secure-delete moreutils \
   curl stow dnsutils gawk mediainfo rlwrap ppa-purge \
-  apache2-utils ntpdate watchman incron hey \
+  apache2-utils ntpdate watchman incron hey cloc \
   renameutils libncurses5 gdebi-core mailutils postfix- \
   iotop lshw hwinfo pv libnss3-tools jq chkservice \
   optipng pngquant jpegoptim imagemagick bat ripgrep pigz \
