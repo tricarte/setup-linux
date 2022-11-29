@@ -706,14 +706,22 @@ wget -qO "$HOME/lf.tar.gz" \
 aunpack lf.tar.gz && chmod +x "$HOME/lf" && sudo mv lf /usr/local/bin && rm -f lf.tar.gz
 
 # Install pistol
-echo "Installing pistol - cmd previewer like ranger's scrop.sh written in Go"
+echo "Installing pistol - cmd previewer like ranger's scope.sh written in Go"
 LATEST=$(get_latest_release "doronbehar/pistol")
 cd ~ || exit
 wget -qO "$HOME/pistol" \
   "https://github.com/doronbehar/pistol/releases/download/$LATEST/pistol"
 chmod +x "$HOME/pistol"
 sudo mv pistol /usr/local/bin && rm -f "$HOME/pistol"
-exit
+
+# Install rustic
+echo "Installing rustic - cli based deduplicating backup tool"
+LATEST=$(get_latest_release "rustic-rs/rustic")
+cd ~ || exit
+wget -qO "$HOME/rustic.tar.gz" \
+  "https://github.com/rustic-rs/rustic/releases/download/${LATEST}/rustic-${LATEST}-x86_64-unknown-linux-gnu.tar.gz"
+aunpack rustic.tar.gz && chmod +x rustic && sudo mv rustic /usr/local/bin/
+rm -f rustic.tar.gz
 
 # Install vim-node-rpc
 yarn global add vim-node-rpc
@@ -729,7 +737,7 @@ git config --global init.defaultBranch main
 
 # Don't require password for these executables.
 echo \
-  "$(whoami) ALL=NOPASSWD: /usr/sbin/iftop, /usr/bin/dnstop, /usr/sbin/iotop, /home/$(whoami)/repos/nettop/nettop" |
+  "$(whoami) ALL=NOPASSWD: /usr/sbin/iftop, /usr/bin/dnstop, /usr/sbin/iotop, /home/$(whoami)/repos/nettop/nettop, /usr/local/bin/rustic" |
   sudo EDITOR='tee -a' visudo
 echo "Defaults:$(whoami) timestamp_timeout=30" | sudo EDITOR='tee -a' visudo
 
