@@ -721,6 +721,7 @@ cd ~ || exit
 wget -qO "$HOME/rustic.tar.gz" \
   "https://github.com/rustic-rs/rustic/releases/download/${LATEST}/rustic-${LATEST}-x86_64-unknown-linux-gnu.tar.gz"
 aunpack rustic.tar.gz && chmod +x rustic && sudo mv rustic /usr/local/bin/
+/usr/local/bin/rustic completions bash > "$HOME/.rustic-completions.bash"
 rm -f rustic.tar.gz
 
 # Install vim-node-rpc
