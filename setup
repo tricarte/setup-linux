@@ -388,18 +388,18 @@ mkdir -p "$HOME/bin" \
 # bmon: Another bandwidth monitor. bmon -p wlp2s0
 # cmatrix: Guess what
 # timg: Terminal image viwer
-# chafa: Terminal image viwer. Seems a little bit faster than timg.
+# chafa: Terminal image viewer. Seems a little bit faster than timg.
 # moreutils: for vidir: bulk rename with vim.
 # cloc: statistics such as number of lines of a code file
 # ncal: cal command
 
-# Default common packages
+# List of common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
   python3-pip xsel mtr-tiny pydf bashtop tmux \
   build-essential libssl-dev cmake pkg-config \
   zip unzip autojump highlight par xclip ncal \
   ncdu htop vnstat vnstati iftop mosh ranger httpie \
-  lnav atool silversearcher-ag lynx multitail \
+  lnav atool silversearcher-ag lynx multitail pandoc \
   shellcheck sqlite3 dnstop libpcap-dev libncurses5-dev \
   libsqlite3-dev autoconf secure-delete moreutils \
   curl stow dnsutils gawk mediainfo rlwrap ppa-purge \
@@ -803,10 +803,10 @@ sudo NEEDRESTART_SUSPEND=1 apt install mariadb-server mariadb-client -y
 # GRANT ALL ON *.* TO 'admin'@'localhost' IDENTIFIED BY 'password' WITH GRANT OPTION;
 # FLUSH PRIVILEGES;
 if [[ $MACHINE == "server" ]]; then
-  sudo mariadb -e"GRANT ALL ON *.* TO 'admin'@'localhost' \
+  sudo mariadb -e"GRANT ALL ON *.* TO 'admin'@'127.0.0.1' \
         IDENTIFIED BY '${DBPASSWORD}' WITH GRANT OPTION; FLUSH PRIVILEGES;"
 else
-  sudo mariadb -e"GRANT ALL ON *.* TO 'admin'@'localhost' \
+  sudo mariadb -e"GRANT ALL ON *.* TO 'admin'@'127.0.0.1' \
         IDENTIFIED BY 'password' WITH GRANT OPTION; FLUSH PRIVILEGES;"
 fi
 
@@ -1232,6 +1232,7 @@ DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
 FLUSH PRIVILEGES;
 EOS
 "
+# TODO: Use kde file dialog within Firefox: widget.use-xdg-desktop-portal.file-picker
 # TODO: https://github.com/eafer/rdrview Command line html/webpage viewer.
 # TODO: https://github.com/strizhechenko/netutils-linux This may be only useful for
 # real servers. A set of tools for monitoring and tuning the network stack.
