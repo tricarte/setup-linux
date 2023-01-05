@@ -497,20 +497,6 @@ opcache.max_wasted_percentage=10
   fi
 fi
 
-# Create separate user with non login shell to be the owner of /var/www
-if [[ $MACHINE == "server" ]]; then
-  sudo adduser webu --shell=/bin/false --disabled-login \
-    --disabled-password --gecos ""
-
-  if [[ -d /var/www ]]; then
-    sudo chown webu:webu /var/www
-  fi
-
-  sudo -u webu git config --global user.name "$GITUSERNAME"
-  sudo -u webu git config --global user.email "$GITEMAIL"
-  sudo -u webu git config --global core.editor vim
-fi
-
 # Install Vim PPA way which is updated daily.
 # sudo add-apt-repository -y ppa:jonathonf/vim-daily
 # This will also install some ruby stuff.
@@ -996,6 +982,21 @@ if [[ $MACHINE == "server" ]]; then
   if [[ 'root' != $(whoami) ]]; then
     sudo passwd --lock root
   fi
+fi
+
+# Create separate user with non login shell to be the owner of /var/www
+if [[ $MACHINE == "server" ]]; then
+  sudo adduser webu --shell=/bin/false --disabled-login \
+    --disabled-password --gecos ""
+
+  if [[ -d /var/www ]]; then
+    sudo chown webu:webu /var/www
+  fi
+
+  sudo -u webu git config --global user.name "$GITUSERNAME"
+  sudo -u webu git config --global user.email "$GITEMAIL"
+  sudo -u webu git config --global core.editor vim
+  sudo -u webu composer config --global github-oauth.github.com "$GHTOKEN"
 fi
 
 # Add current user to www-data group
