@@ -571,6 +571,9 @@ php -r "readfile('http://getcomposer.org/installer');" |
 
 composer config --global github-oauth.github.com "$GHTOKEN"
 composer config --global repo.packagist composer https://packagist.org
+# NOTE: Disabled repman, because of encountering a problem where a regular composer
+# package is not installable through it. But keeping the plugin config around
+# does not harm.
 composer config --global allow-plugins.repman-io/composer-plugin true -n
 
 echo "Installing composer global packages"
@@ -582,7 +585,7 @@ composer g require --quiet "squizlabs/php_codesniffer=*" \
   seld/jsonlint \
   friendsofphp/php-cs-fixer \
   gordalina/cachetool \
-  repman-io/composer-plugin
+  # repman-io/composer-plugin # see above note
 
 echo "Installing wp cli admin command..."
 # This allows you to open site in your browser.
