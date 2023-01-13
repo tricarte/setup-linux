@@ -791,10 +791,10 @@ if [[ ! -d "$HOME/.config/rustic" ]]; then
 fi
 cp "$HOME/dotfiles-templates/rustic-profiles/*" "$HOME/.config/rustic"
 for profile in "${HOME}"/.config/rustic/*.toml; do
-    sed -i -e "s:change_me_username:${USER}:g" "$profile"
-    if [[ -n $EXTUSBDEVID ]]; then
-        sed -i -e "s:change_me_deviceID:${EXTUSBDEVID}:g" "$profile"
-    fi
+  sed -i -e "s:change_me_username:${USER}:g" "$profile"
+  if [[ -n $EXTUSBDEVID ]]; then
+    sed -i -e "s:change_me_deviceID:${EXTUSBDEVID}:g" "$profile"
+  fi
 done
 
 # Copy tmuxp config from dotfiles-templates to ~/.tmuxp/
@@ -1284,6 +1284,13 @@ if [[ -f "$HOME/bin/unmount-usb-drives" ]]; then
   fi
   ln -s "$HOME/bin/unmount-usb-drives" \
     "$HOME/.config/plasma-workspace/shutdown/unmount-usb-drives"
+fi
+
+# Reduce the default timeout when stopping a systemd service
+if [[ -f /etc/systemd/system.conf ]]; then
+  sudo replace -s \
+    '#DefaultTimeoutStopSec=90s' 'DefaultTimeoutStopSec=10s' \
+    -- /etc/systemd/system.conf
 fi
 
 end=$SECONDS
