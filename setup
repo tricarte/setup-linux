@@ -24,6 +24,8 @@ fi
 
 GWIFACE=$(ip route | grep default | cut -d" " -f5)
 IPADDR=$(hostname -I)
+# Will be used when creating gpg keys and .msmtprc config file
+USERS=(root "$USER" webu)
 
 if [[ ! $GWIFACE =~ ^[we] ]]; then
   echo "You are not connected to the internet through wireless or ethernet card..."
@@ -42,9 +44,41 @@ git config --global core.sshCommand \
 while :; do
   read -rp "Enter your github/gitlab username: " GITUSERNAME
   read -rp "Enter your email address: " GITEMAIL
+  read -rp "Enter your name for the gpg key: " GPGKEY_REALNAME
   echo ""
   echo "Gitlab/Github username: $GITUSERNAME"
   echo "Email: $GITEMAIL"
+
+  read -p "Would you like to also enter the SMTP relay host credentials?  (y/n): " -r
+  echo ""
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    SETUP_SMTP=1
+    read -rp "Enter an account name of your choice to identify the settings: " SMTP_ACCOUNTNAME
+    read -rp "Enter the SMTP relay host address: " SMTP_RELAY_HOST
+    read -rp "Enter the username for the SMTP host: " SMTP_USERNAME
+    read -rp "Enter the mail address to be used for FROM field: " SMTP_FROM
+    while :; do
+      echo ""
+      echo "Enter the password for the SMTP user: "
+      read -rs SMTP_PASSWORD
+
+      echo "Reenter the password for the SMTP user: "
+      read -rs SMTP_PASSWORDCHK
+
+      if [[ $SMTP_PASSWORD == "$SMTP_PASSWORDCHK" ]]; then
+        break
+      else
+        echo ""
+        echo "Passwords do not match."
+      fi
+    done
+  fi
+
+  read -p "Would you like to enter the device ID for the external USB storage?  (y/n): " -r
+  echo ""
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    read -rp "Enter the external USB storage device ID: " EXTUSBDEVID
+  fi
 
   echo ""
   read -p "Are these values correct?  (y/n): " -r
@@ -395,7 +429,7 @@ mkdir -p "$HOME/bin" \
 
 # List of common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
-  python3-pip xsel mtr-tiny pydf bashtop tmux \
+  gpg python3-pip xsel mtr-tiny pydf bashtop tmux \
   build-essential libssl-dev cmake pkg-config \
   zip unzip autojump highlight par xclip ncal \
   ncdu htop vnstat vnstati iftop mosh ranger httpie \
@@ -570,8 +604,8 @@ composer g require --quiet "squizlabs/php_codesniffer=*" \
   mnapoli/pretty \
   seld/jsonlint \
   friendsofphp/php-cs-fixer \
-  gordalina/cachetool \
-  # repman-io/composer-plugin # see above note
+  gordalina/cachetool
+# repman-io/composer-plugin # see above note
 
 echo "Installing wp cli admin command..."
 # This allows you to open site in your browser.
@@ -750,11 +784,23 @@ rm -r tmpdotfiles
 # shellcheck source=/dev/null
 source "$HOME/.bashrc"
 
+# Copy rustic profiles from dotfiles-templates to ~/.config/rustic
+# FIXME: You have to provide the ID of the external USB drive
+if [[ ! -d "$HOME/.config/rustic" ]]; then
+  mkdir "$HOME/.config/rustic"
+fi
+cp "$HOME/dotfiles-templates/rustic-profiles/*" "$HOME/.config/rustic"
+for profile in "${HOME}"/.config/rustic/*.toml; do
+    sed -i -e "s:change_me_username:${USER}:g" "$profile"
+    if [[ -n $EXTUSBDEVID ]]; then
+        sed -i -e "s:change_me_deviceID:${EXTUSBDEVID}:g" "$profile"
+    fi
+done
+
 # Copy tmuxp config from dotfiles-templates to ~/.tmuxp/
 if [[ ! -d "$HOME/.tmuxp" ]]; then
   mkdir "$HOME/.tmuxp"
 fi
-
 cp "$HOME/dotfiles-templates/tmuxp/mytmux.yaml" "$HOME/.tmuxp"
 sed -i -e "s:change_iface:$GWIFACE:g" "$HOME/.tmuxp/mytmux.yaml"
 sed -i -e "s:change_ip:$IPADDR:g" "$HOME/.tmuxp/mytmux.yaml"
@@ -1031,6 +1077,77 @@ if [[ $MACHINE == "server" ]]; then
   cd csf || exit
   sudo bash install.sh
   cd "$HOME" || exit
+fi
+
+# Install msmtp
+if [[ $MACHINE == "server" ]]; then
+  echo "Installing msmtp"
+  sudo debconf-set-selections <<<"msmtp msmtp/apparmor boolean false"
+  sudo NEEDRESTART_SUSPEND=1 apt install -y msmtp msmtp-mta
+fi
+
+# Generate gpg key for the current user, webu and root
+# Not doing this for the desktop, because will probably use backup
+if [[ $MACHINE == "server" ]]; then
+  for user in "${USERS[@]}"; do
+    echo "Generating gpg key for ${user}..."
+    echo ""
+    if ! sudo -u "${user}" gpg -k "$GITEMAIL" >/dev/null 2>&1; then
+      gpg --batch --gen-key <<EOF
+%no-protection
+Key-Type:1
+Key-Length:2048
+Subkey-Type:1
+Subkey-Length:2048
+Name-Real: $GPGKEY_REALNAME
+Name-Email: $GITEMAIL
+Expire-Date:0
+EOF
+    fi
+  done
+fi # End of server check for gpg key generation
+
+# Setup .msmtprc files
+if [[ $MACHINE == "server" ]]; then
+  if [[ $SETUP_SMTP ]]; then
+    for user in "${USERS[@]}"; do
+      USRHOME=$(getent passwd "${user}" | cut -d: -f6)
+      ENCRYPTED_PASS_FILE="${USRHOME}/.msmtp.gpg"
+      echo "
+# Set default values for all following \"account\" sections
+defaults
+port 587
+tls on
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
+logfile /var/log/msmtp.log
+
+account $SMTP_ACCOUNTNAME
+host $SMTP_RELAY_HOST
+from $SMTP_FROM
+auth on
+user $SMTP_USERNAME
+passwordeval gpg --no-tty -q -d $ENCRYPTED_PASS_FILE
+# If you are using pass password manager
+# passwordeval \"pass email/user1\"
+
+# Set a default account
+account default : $SMTP_ACCOUNTNAME
+" | sudo -u "${user}" tee "${USRHOME}/.msmtprc" # End of msmtprc output
+
+      # Create the encrypted password file
+      echo "$SMTP_PASSWORD" | sudo -u "${user}" gpg --encrypt -o "$ENCRYPTED_PASS_FILE" -r "$GITEMAIL"
+    done
+  fi
+fi
+
+# Install wp-cron-runner
+if [[ $MACHINE == "server" ]]; then
+  echo "Installing tricarte/wp-cron-runner scripts"
+  echo ""
+  git clone --quiet "https://github.com/tricarte/wp-cron-runner" "$HOME/repos/wp-cron-runner"
+  sudo ln -s "$HOME/repos/wp-cron-runner/wpcomposerupdater" "/usr/local/bin/wpcomposerupdater"
+  sudo ln -s "$HOME/repos/wp-cron-runner/wpcronrunner" "/usr/local/bin/wpcronrunner"
+  sudo ln -s "$HOME/repos/wp-cron-runner/wpmajorupdatecheck" "/usr/local/bin/wpmajorupdatecheck"
 fi
 
 # Not that important: A top like tool for Intel GPUs.
