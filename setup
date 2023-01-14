@@ -968,7 +968,9 @@ if [[ $MACHINE == "desktop" ]]; then
     glmark2 kdenlive mkusb mkusb-nox usb-pack-efi \
     safeeyes simplescreenrecorder sqlitebrowser zeal \
     ubuntu-restricted-addons filelight libnotify-bin \
-    ghostwriter libstartup-notification0
+    ghostwriter libstartup-notification0 \
+    libreoffice-numbertext libreoffice-script-provider-js \
+    libreoffice-script-provider-python libreoffice-templates
 
   # Install MailHog
   # Manually running: ~/go/bin/MailHog
