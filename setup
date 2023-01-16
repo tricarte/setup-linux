@@ -1086,6 +1086,16 @@ if [[ $MACHINE == "server" ]]; then
   echo "Installing msmtp"
   sudo debconf-set-selections <<<"msmtp msmtp/apparmor boolean false"
   sudo NEEDRESTART_SUSPEND=1 apt install -y msmtp msmtp-mta
+  sudo touch /var/log/msmtp.log
+  sudo chown root:msmtp /var/log/msmtp.log
+  sudo chmod g+w /var/log/msmtp.log
+
+  # Make USERS be member of msmtp group
+  for user in "${USERS[@]}"; do
+    sudo usermod -aG msmtp "${user}"
+  done
+  # TODO: Until we move www-data to USERS array
+  sudo usermod -aG msmtp www-data
 fi
 
 # Generate gpg key for the current user, webu and root
@@ -1095,7 +1105,7 @@ if [[ $MACHINE == "server" ]]; then
     echo "Generating gpg key for ${user}..."
     echo ""
     if ! sudo -u "${user}" gpg -k "$GITEMAIL" >/dev/null 2>&1; then
-      gpg --batch --gen-key <<EOF
+      sudo -u "${user}" gpg --batch --gen-key <<EOF
 %no-protection
 Key-Type:1
 Key-Length:2048
@@ -1107,9 +1117,26 @@ Expire-Date:0
 EOF
     fi
   done
+  # We need to create a separate procedure for www-data user
+  # Source: https://maslosoft.com/blog/2017/09/12/using-gpg-with-php-on-server/
+  sudo mkdir -p /home/wdt/.gnupg
+  sudo chown -R www-data:www-data /home/wdt
+  sudo chmod 700 /home/wdt
+  # Generate the gpg key for www-data user
+  sudo -u www-data gpg --homedir /home/wdt/.gnupg --batch --gen-key <<EOF
+%no-protection
+Key-Type:1
+Key-Length:2048
+Subkey-Type:1
+Subkey-Length:2048
+Name-Real: $GPGKEY_REALNAME
+Name-Email: $GITEMAIL
+Expire-Date:0
+EOF
+
 fi # End of server check for gpg key generation
 
-# Setup .msmtprc files
+# Setup .msmtprc and encrypted password files
 if [[ $MACHINE == "server" ]]; then
   if [[ $SETUP_SMTP ]]; then
     for user in "${USERS[@]}"; do
@@ -1139,6 +1166,9 @@ account default : $SMTP_ACCOUNTNAME
       # Create the encrypted password file
       echo "$SMTP_PASSWORD" | sudo -u "${user}" gpg --encrypt -o "$ENCRYPTED_PASS_FILE" -r "$GITEMAIL"
     done
+
+    # Generate the encrypted password file for www-data in /home/www-data/.gnupg separately
+    echo "$SMTP_PASSWORD" | sudo -u www-data gpg --homedir "/home/wdt/.gnupg" --encrypt -o "/home/wdt/.msmtp-gmail.gpg" -r "$GITEMAIL"
   fi
 fi
 
@@ -1240,9 +1270,26 @@ EOT
   #     echo "address=/.test/127.0.0.1" | sudo tee /etc/dnsmasq.d/valet
   # fi
 
-  # This may make dns resolution slow, so it is disabled
+  # This may slow down dns resolution, so it is disabled
   # Upstream dns server setting for dnsmasq.
   # echo "server=9.9.9.9" | sudo tee /etc/dnsmasq.d/server
+
+  # This fixes the issue when there is no network connection
+  # and dnsmasq cannot resolve .test domains.
+  # Remember that you have dnsm in repos directory. But that script writes
+  # the system assigned dns address to /etc/dnsmasq.d/server. When needed,
+  # that script must be in /etc/NetworkManager/dispatcher.d.
+  echo "server=127.0.0.1" | sudo tee /etc/dnsmasq.d/server
+
+  cat <<EOT >>"/etc/dnsmasq.d/options"
+resolv-file=/opt/valet-linux/dns-servers
+listen-address=127.0.0.1
+bind-interfaces
+cache-size=150
+proxy-dnssec
+strict-order
+
+EOT
 
   # You may need to modify this file after valet installation.
   # /etc/nginx/sites-available/valet.conf
