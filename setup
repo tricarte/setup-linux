@@ -1432,3 +1432,11 @@ EOS
 #     Port portNumber
 #     IdentityFile ~/.ssh/private-key-file
 #     IdentitiesOnly yes
+#
+# Fonts I use for the KDE desktop:
+# General, Toolbar, Menu, Window Title: Liberation Sans 9pt
+# Small: Liberation Sans 8pt
+# Fixed Width: JetBrainsMono Nerd Font Mono Regular 9pt
+# Sub-pixel rendering: RGB
+# Hinting: Slight
+# Force font DPI: 100 for the laptop. Search google for 'calculate font dpi'
