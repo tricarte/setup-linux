@@ -417,7 +417,7 @@ mkdir -p "$HOME/bin" \
 # hey: HTTP load testing - alternative ab (apache benchmark)
 # atool: Tool for managing file archives
 # glances and smem: System monitoring related packages
-# surfraw: Start browser based WEB requests using cli
+# surfraw: Start browser based WEB requests using cli, best for search engines
 # sxiv: X image viewer. Can output selection to stdout.
 # bmon: Another bandwidth monitor. bmon -p wlp2s0
 # cmatrix: Guess what
@@ -426,22 +426,28 @@ mkdir -p "$HOME/bin" \
 # moreutils: for vidir: bulk rename with vim.
 # cloc: statistics such as number of lines of a code file
 # ncal: cal command
+# libmaxminddb-dev libgeoip-dev: to compile goaccess
+# libfile-mimeinfo-perl: Provides mimetype command
+# inxi: Simple sysinfo written in Perl
+# webp: For cwebp cli converter. Supports jpg, png, tiff
+# texlive: For generating pdf from markdown using pandoc
 
 # List of common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
   gpg python3-pip xsel mtr-tiny pydf bashtop tmux \
   build-essential libssl-dev cmake pkg-config \
-  zip unzip autojump highlight par xclip ncal \
+  zip unzip autojump highlight par xclip ncal webp \
   ncdu htop vnstat vnstati iftop mosh ranger httpie \
-  lnav atool silversearcher-ag lynx multitail pandoc \
+  lnav atool silversearcher-ag lynx multitail pandoc texlive \
   shellcheck sqlite3 dnstop libpcap-dev libncurses5-dev \
   libsqlite3-dev autoconf secure-delete moreutils \
   curl stow dnsutils gawk mediainfo rlwrap ppa-purge \
   apache2-utils ntpdate watchman incron hey cloc \
   renameutils libncurses5 gdebi-core mailutils postfix- \
   iotop lshw hwinfo pv libnss3-tools jq chkservice \
-  optipng pngquant jpegoptim imagemagick bat ripgrep pigz \
-  glances smem surfraw sxiv bmon cmatrix timg chafa tty-clock
+  optipng pngquant jpegoptim imagemagick graphicsmagick bat ripgrep pigz \
+  glances smem surfraw sxiv bmon cmatrix timg chafa tty-clock \
+  libmaxminddb-dev libgeoip-dev libfile-mimeinfo-perl inxi
 
 pip install --user tmuxp
 
@@ -527,6 +533,9 @@ opcache.save_comments=1
 
 ; https://tideways.io/profiler/blog/fine-tune-your-opcache-configuration-to-avoid-caching-suprises
 opcache.max_wasted_percentage=10
+opcache.dups_fix=true
+; Only below document root will be able to query opcache status
+opcache.restrict_api=/var/www/localhost
 " | sudo tee -a "/etc/php/${phpfpmversion}/fpm/conf.d/10-opcache.ini"
   fi
 fi
@@ -560,6 +569,26 @@ LATEST=$(get_latest_release "dbrgn/tealdeer")
 wget -qO "$HOME/bin/tldr" \
   "https://github.com/dbrgn/tealdeer/releases/download/$LATEST/tealdeer-linux-x86_64-musl" &&
   chmod +x "$HOME/bin/tldr"
+
+echo "Installing choose: alternative to cut and awk written in Rust..."
+LATEST=$(get_latest_release "theryangeary/choose")
+sudo wget -qO "/usr/local/bin/choose" \
+  "https://github.com/theryangeary/choose/releases/download/${LATEST}/choose-x86_64-unknown-linux-gnu" &&
+  sudo chmod +x "/usr/local/bin/choose"
+
+echo "Installing sd: lightweight, easy to use alternative to sed..."
+LATEST=$(get_latest_release "chmln/sd")
+sudo wget -qO "/usr/local/bin/sd" \
+  "https://github.com/chmln/sd/releases/download/${LATEST}/sd-${LATEST}-x86_64-unknown-linux-gnu" &&
+  sudo chmod +x "/usr/local/bin/sd"
+
+echo "Installing bottom (btm): System resource usage monitor written in Rust..."
+LATEST=$(get_latest_release "ClementTsang/bottom")
+wget -qO "$HOME/bottom.deb" \
+  "https://github.com/ClementTsang/bottom/releases/download/${LATEST}/bottom_${LATEST}_amd64.deb"
+if [[ -f "$HOME/bottom.deb" ]]; then
+    sudo apt install -y "$HOME/bottom.deb"
+fi
 
 echo "Installing nettop: bandwidth usage by process..."
 git clone --quiet "https://github.com/Emanem/nettop.git" "$HOME/repos/nettop" &&
@@ -749,6 +778,7 @@ aunpack rustic.tar.gz && chmod +x rustic && sudo mv rustic /usr/local/bin/
 rm -f rustic.tar.gz
 
 # Install shfmt
+# TODO: This is in official repo.
 echo "Installing shfmt - shell script formatter written in GoLang"
 LATEST=$(get_latest_release "mvdan/sh")
 cd ~ || exit
@@ -1003,6 +1033,12 @@ EOL
   echo "Installing nsxiv image viewer"
   if [[ -f "$HOME/repos/debs/nsxiv/nsxiv_30-2_amd64.deb" ]]; then
     sudo apt install -y "$HOME/repos/debs/nsxiv/nsxiv_30-2_amd64.deb"
+  fi
+
+  # Install lockrun from local deb
+  echo "Installing lockrun"
+  if [[ -f "$HOME/repos/debs/lockrun/lockrun_1.2-12_amd64.deb" ]]; then
+    sudo apt install -y "$HOME/repos/debs/lockrun/lockrun_1.2-12_amd64.deb"
   fi
 
 fi # End of installation of desktop applications
