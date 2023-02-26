@@ -430,7 +430,6 @@ mkdir -p "$HOME/bin" \
 # libfile-mimeinfo-perl: Provides mimetype command
 # inxi: Simple sysinfo written in Perl
 # webp: For cwebp cli converter. Supports jpg, png, tiff
-# texlive: For generating pdf from markdown using pandoc
 
 # List of common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -438,7 +437,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
   build-essential libssl-dev cmake pkg-config \
   zip unzip autojump highlight par xclip ncal webp \
   ncdu htop vnstat vnstati iftop mosh ranger httpie \
-  lnav atool silversearcher-ag lynx multitail pandoc texlive \
+  lnav atool silversearcher-ag lynx multitail pandoc \
   shellcheck sqlite3 dnstop libpcap-dev libncurses5-dev \
   libsqlite3-dev autoconf secure-delete moreutils \
   curl stow dnsutils gawk mediainfo rlwrap ppa-purge \
@@ -989,6 +988,7 @@ if [[ $MACHINE == "desktop" ]]; then
   # appmenu-gtk2-module appmenu-gtk3-module: Global menu in KDE.
   # libstartup-notification0: To get rid of a warning message that kitty
   # terminal emulator gives when using 'kitty launch'
+  # texlive: For generating pdf from markdown using pandoc
   echo "Installing desktop related apps..."
   echo ""
   sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -1001,6 +1001,7 @@ if [[ $MACHINE == "desktop" ]]; then
     ghostwriter libstartup-notification0 screenkey \
     libreoffice-numbertext libreoffice-script-provider-js \
     libreoffice-script-provider-python libreoffice-templates
+    texlive texlive-latex-extra texlive-lualatex
 
   # Install MailHog
   # Manually running: ~/go/bin/MailHog
