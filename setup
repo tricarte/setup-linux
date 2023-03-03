@@ -446,7 +446,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
   iotop lshw hwinfo pv libnss3-tools jq chkservice \
   optipng pngquant jpegoptim imagemagick graphicsmagick bat ripgrep pigz \
   glances smem surfraw sxiv bmon cmatrix timg chafa tty-clock \
-  libmaxminddb-dev libgeoip-dev libfile-mimeinfo-perl inxi
+  libmaxminddb-dev libgeoip-dev libfile-mimeinfo-perl inxi gifsicle
 
 pip install --user tmuxp
 
