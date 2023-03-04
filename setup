@@ -757,6 +757,14 @@ wget -qO "$HOME/lf.tar.gz" \
   "https://github.com/gokcehan/lf/releases/download/$LATEST/lf-linux-amd64.tar.gz"
 aunpack lf.tar.gz && chmod +x "$HOME/lf" && sudo mv lf /usr/local/bin && rm -f lf.tar.gz
 
+# Install pdu
+echo "Installing pdu - Disk usage analyzer written Rust"
+LATEST=$(get_latest_release "KSXGitHub/parallel-disk-usage")
+cd ~ || exit
+sudo wget -qO "/usr/local/bin/pdu" \
+  "https://github.com/KSXGitHub/parallel-disk-usage/releases/download/${LATEST}/pdu-x86_64-unknown-linux-gnu"
+sudo chmod +x "/usr/local/bin/pdu"
+
 # Install pistol
 echo "Installing pistol - cmd previewer like ranger's scope.sh written in Go"
 LATEST=$(get_latest_release "doronbehar/pistol")
