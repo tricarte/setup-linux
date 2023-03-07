@@ -430,6 +430,7 @@ mkdir -p "$HOME/bin" \
 # libfile-mimeinfo-perl: Provides mimetype command
 # inxi: Simple sysinfo written in Perl
 # webp: For cwebp cli converter. Supports jpg, png, tiff
+# xjobs: For running commands parallel
 
 # List of common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -441,7 +442,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
   shellcheck sqlite3 dnstop libpcap-dev libncurses5-dev \
   libsqlite3-dev autoconf secure-delete moreutils \
   curl stow dnsutils gawk mediainfo rlwrap ppa-purge \
-  apache2-utils ntpdate watchman incron hey cloc \
+  apache2-utils ntpdate watchman incron hey cloc xjobs \
   renameutils libncurses5 gdebi-core mailutils postfix- \
   iotop lshw hwinfo pv libnss3-tools jq chkservice \
   optipng pngquant jpegoptim imagemagick graphicsmagick bat ripgrep pigz \
