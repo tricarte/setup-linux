@@ -431,8 +431,9 @@ mkdir -p "$HOME/bin" \
 # inxi: Simple sysinfo written in Perl
 # webp: For cwebp cli converter. Supports jpg, png, tiff
 # xjobs: For running commands parallel
+# parallel: GNU Parallel
 
-# List of common packages
+# list of common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
   gpg python3-pip xsel mtr-tiny pydf bashtop tmux \
   build-essential libssl-dev cmake pkg-config \
@@ -442,7 +443,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
   shellcheck sqlite3 dnstop libpcap-dev libncurses5-dev \
   libsqlite3-dev autoconf secure-delete moreutils \
   curl stow dnsutils gawk mediainfo rlwrap ppa-purge \
-  apache2-utils ntpdate watchman incron hey cloc xjobs \
+  apache2-utils ntpdate watchman incron hey cloc xjobs parallel \
   renameutils libncurses5 gdebi-core mailutils postfix- \
   iotop lshw hwinfo pv libnss3-tools jq chkservice \
   optipng pngquant jpegoptim imagemagick graphicsmagick bat ripgrep pigz \
