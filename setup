@@ -436,7 +436,7 @@ mkdir -p "$HOME/bin" \
 # list of common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
   gpg python3-pip xsel mtr-tiny pydf bashtop tmux \
-  build-essential libssl-dev cmake pkg-config \
+  build-essential libssl-dev cmake pkg-config rclone \
   zip unzip autojump highlight par xclip ncal webp \
   ncdu htop vnstat vnstati iftop mosh ranger httpie \
   lnav atool silversearcher-ag lynx multitail pandoc \
