@@ -1005,6 +1005,7 @@ if [[ $MACHINE == "desktop" ]]; then
   # libstartup-notification0: To get rid of a warning message that kitty
   # terminal emulator gives when using 'kitty launch'
   # texlive: For generating pdf from markdown using pandoc
+  # nomacs: Photo editor, viewer
   echo "Installing desktop related apps..."
   echo ""
   sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -1017,7 +1018,7 @@ if [[ $MACHINE == "desktop" ]]; then
     ghostwriter libstartup-notification0 screenkey \
     libreoffice-numbertext libreoffice-script-provider-js \
     libreoffice-script-provider-python libreoffice-templates
-    texlive texlive-latex-extra texlive-lualatex
+    texlive texlive-latex-extra texlive-lualatex nomacs
 
   # Install MailHog
   # Manually running: ~/go/bin/MailHog
