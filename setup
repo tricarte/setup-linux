@@ -432,24 +432,30 @@ mkdir -p "$HOME/bin" \
 # webp: For cwebp cli converter. Supports jpg, png, tiff
 # xjobs: For running commands parallel
 # parallel: GNU Parallel
+# libperl-dev: To compile vim with perl support
+# libterm-readline-gnu-perl: Perl repl 'reply' is better with this package.
+# libdbd-sqlite3-perl: Sqlite database driver for Perl DBI.
+# whois: Contains the mkpasswd command line utility to generate password hashes.
+# pwgen: Generate random passwords, written in C (another alternative in perl: makepasswd)
 
 # list of common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
-  gpg python3-pip xsel mtr-tiny pydf bashtop tmux \
+  gpg python3-pip xsel mtr-tiny pydf bashtop tmux whois \
   build-essential libssl-dev cmake pkg-config rclone \
-  zip unzip autojump highlight par xclip ncal webp \
+  zip unzip autojump highlight par xclip ncal webp pwgen \
   ncdu htop vnstat vnstati iftop mosh ranger httpie \
-  lnav atool silversearcher-ag lynx multitail pandoc \
+  lnav atool silversearcher-ag lynx multitail pandoc libdbd-sqlite3-perl \
   shellcheck sqlite3 dnstop libpcap-dev libncurses5-dev \
-  libsqlite3-dev autoconf secure-delete moreutils \
+  libsqlite3-dev autoconf secure-delete moreutils libterm-readline-gnu-perl \
   curl stow dnsutils gawk mediainfo rlwrap ppa-purge \
   apache2-utils ntpdate watchman incron hey cloc xjobs parallel \
   renameutils libncurses5 gdebi-core mailutils postfix- \
-  iotop lshw hwinfo pv libnss3-tools jq chkservice \
+  iotop lshw hwinfo pv libnss3-tools jq chkservice libperl-dev \
   optipng pngquant jpegoptim imagemagick graphicsmagick bat ripgrep pigz \
   glances smem surfraw sxiv bmon cmatrix timg chafa tty-clock \
   libmaxminddb-dev libgeoip-dev libfile-mimeinfo-perl inxi gifsicle
 
+# TODO: This may require a virtualenv in near future.
 pip install --user tmuxp
 
 if [[ $MACHINE == "server" ]]; then
@@ -468,7 +474,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
   php-mysql php-mbstring php-tidy php-xml php-bcmath php-soap \
   php-intl php-readline php-imagick php-msgpack php-igbinary \
   php-dev php-zip php-imap php-gmp php-redis php-apcu phpunit \
-  php-yaml
+  php-yaml php-gmagick
 
 # PHP 7.4 packages
 # sudo NEEDRESTART_SUSPEND=1 apt install \
@@ -1409,10 +1415,6 @@ exit
 
 # TODO: kitty installation and launching
 # $HOME/.local/kitty.app/bin/kitty --listen-on unix:/tmp/mykitty
-
-# TODO: 7G Firewall now supports nginx. It's a very easy installation.
-# Just take care of accidental multiple inclusion of 7g conf files from both nginx.conf and
-# virtual hosts.
 
 # TODO: https://github.com/lemnos/theme.sh Easily change terminal colors
 
