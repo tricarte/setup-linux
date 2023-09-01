@@ -961,6 +961,17 @@ skip-name-resolve
 
 # Enable query cache
 query_cache_type=1
+
+# By default, engine independent statistics are collected but not used.
+# When you execute below query:
+# ANALYZE TABLE table_name PERSISTENT FOR ALL;
+# MariaDB will use those engine independent stats regardless of the value of
+# use_stat_tables.
+# https://mariadb.com/kb/en/server-system-variables/#use_stat_tables
+# https://mariadb.com/kb/en/engine-independent-table-statistics/
+# This setting determines that MariaDB will either prefer as a whole or use those
+# stats as a complementary to those created by the storage engine.
+use_stat_tables=complementary_for_queries
 " | sudo tee -a /etc/mysql/mariadb.conf.d/60-server.cnf
 
 echo "Setting up max journal size..."
