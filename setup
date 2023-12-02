@@ -443,7 +443,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
   gpg python3-pip xsel mtr-tiny pydf bashtop tmux whois \
   build-essential libssl-dev cmake pkg-config rclone \
   zip unzip autojump highlight par xclip ncal webp pwgen \
-  ncdu htop vnstat vnstati iftop mosh ranger httpie \
+  ncdu htop vnstat vnstati iftop mosh ranger httpie ngrep \
   lnav atool silversearcher-ag lynx multitail pandoc libdbd-sqlite3-perl \
   shellcheck sqlite3 dnstop libpcap-dev libncurses5-dev \
   libsqlite3-dev autoconf secure-delete moreutils libterm-readline-gnu-perl \
@@ -716,7 +716,7 @@ echo "Installing bandwhich - monitor network bandwidth by process..."
 LATEST=$(get_latest_release "imsnif/bandwhich")
 cd ~ || exit
 wget -qO "$HOME/bandwhich.tar.gz" \
-  "https://github.com/imsnif/bandwhich/releases/download/$LATEST/bandwhich-v$(echo "$LATEST" | tr -d 'v')-x86_64-unknown-linux-musl.tar.gz"
+  "https://github.com/imsnif/bandwhich/releases/download/$LATEST/bandwhich-${LATEST}-x86_64-unknown-linux-musl.tar.gz"
 aunpack bandwhich.tar.gz && mv bandwhich ~/bin &&
   rm -f bandwhich.tar.gz
 
@@ -724,7 +724,7 @@ echo "Installing glow (Markdown viewer)..."
 LATEST=$(get_latest_release "charmbracelet/glow")
 cd ~ || exit
 wget -qO "$HOME/glow.deb" \
-  "https://github.com/charmbracelet/glow/releases/download/$LATEST/glow_$(echo "$LATEST" | tr -d 'v')_linux_amd64.deb"
+  "https://github.com/charmbracelet/glow/releases/download/$LATEST/glow_$(echo "$LATEST" | tr -d 'v')_amd64.deb"
 sudo dpkg -i "glow.deb"
 rm -f glow.deb
 
@@ -778,7 +778,7 @@ echo "Installing pistol - cmd previewer like ranger's scope.sh written in Go"
 LATEST=$(get_latest_release "doronbehar/pistol")
 cd ~ || exit
 wget -qO "$HOME/pistol" \
-  "https://github.com/doronbehar/pistol/releases/download/$LATEST/pistol"
+  "https://github.com/doronbehar/pistol/releases/download/$LATEST/pistol-static-linux-x86_64"
 chmod +x "$HOME/pistol"
 sudo mv pistol /usr/local/bin && rm -f "$HOME/pistol"
 
