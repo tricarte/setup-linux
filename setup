@@ -415,6 +415,7 @@ mkdir -p "$HOME/bin" \
 # chkservice: list/start/stop systemd services.
 # pv: Pipe viewer
 # hey: HTTP load testing - alternative ab (apache benchmark)
+# wrk: HTTP load testing - alternative to hey
 # atool: Tool for managing file archives
 # glances and smem: System monitoring related packages
 # surfraw: Start browser based WEB requests using cli, best for search engines
@@ -447,7 +448,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
   lnav atool silversearcher-ag lynx multitail pandoc libdbd-sqlite3-perl \
   shellcheck sqlite3 dnstop libpcap-dev libncurses5-dev \
   libsqlite3-dev autoconf secure-delete moreutils libterm-readline-gnu-perl \
-  curl stow dnsutils gawk mediainfo rlwrap ppa-purge \
+  curl stow dnsutils gawk mediainfo rlwrap ppa-purge wrk \
   apache2-utils ntpdate watchman incron hey cloc xjobs parallel \
   renameutils libncurses5 gdebi-core mailutils postfix- \
   iotop lshw hwinfo pv libnss3-tools jq chkservice libperl-dev \
@@ -679,6 +680,10 @@ echo "Installing intelephense..."
 echo ""
 npm install --global intelephense
 
+echo "Installing svgo - svg optimizer"
+echo ""
+npm install --global svgo
+
 # starship.rs: a shell prompt customized for git repos
 echo "Installing starship - cli prompt"
 curl -sS https://starship.rs/install.sh | sh -s -- -y
@@ -700,7 +705,7 @@ echo "Installing fd-find..."
 LATEST=$(get_latest_release "sharkdp/fd")
 cd ~ || exit
 wget -qO "$HOME/fd.deb" \
-  "https://github.com/sharkdp/fd/releases/download/$LATEST/fd_$(echo "$LATEST" | tr -d 'v')_amd64.deb"
+  "https://github.com/sharkdp/fd/releases/download/${LATEST}/fd_$(echo "${LATEST}" | tr -d 'v')_amd64.deb"
 sudo dpkg -i "fd.deb"
 rm -f fd.deb
 
@@ -800,6 +805,11 @@ cd ~ || exit
 wget -qO "$HOME/shfmt" \
   "https://github.com/mvdan/sh/releases/download/${LATEST}/shfmt_${LATEST}_linux_amd64"
 chmod +x shfmt && sudo mv shfmt /usr/local/bin/
+
+echo "Installing perli - A Perl REPL"
+wget -qO "$HOME/bin/perli" \
+    "https://raw.githubusercontent.com/mklement0/perli/stable/bin/perli"
+chmod +x "$HOME/bin/perli"
 
 # Install vim-node-rpc
 yarn global add vim-node-rpc
@@ -1255,7 +1265,7 @@ fi
 # Install Rust Lang
 # Select default options. It will modify PATH with ~/.cargo/bin.
 # So expect changes in .profile and .bashrc
-# Download size is nearly 100M for version 1.53.
+# Download size is over 148M as of version 1.67.
 # https://rustup.rs/
 
 # Install valet-linux
