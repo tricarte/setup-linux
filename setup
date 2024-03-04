@@ -613,6 +613,10 @@ git clone --quiet "https://github.com/universal-ctags/ctags.git" "$HOME/repos/ct
   cd "$HOME/repos/ctags" && ./autogen.sh && ./configure && make -j2 &&
   sudo make install && cd "$HOME" || exit
 
+echo "Installing ps_mem python script"
+sudo wget -qO /usr/local/bin/ps_mem https://raw.githubusercontent.com/pixelb/ps_mem/master/ps_mem.py
+sudo chmod a+x /usr/local/bin/ps_mem
+
 # PHP Documentation inside psysh using "doc array_push" for example
 wget -qO "$HOME/.local/share/psysh/php_manual.sqlite" \
   "http://psysh.org/manual/en/php_manual.sqlite"
@@ -1027,6 +1031,7 @@ if [[ $MACHINE == "desktop" ]]; then
   # terminal emulator gives when using 'kitty launch'
   # texlive: For generating pdf from markdown using pandoc
   # nomacs: Photo editor, viewer
+  # adwaita-qt and gnome-themes-extra: For audacity look and feel
   echo "Installing desktop related apps..."
   echo ""
   sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -1039,7 +1044,7 @@ if [[ $MACHINE == "desktop" ]]; then
     ghostwriter libstartup-notification0 screenkey \
     libreoffice-numbertext libreoffice-script-provider-js \
     libreoffice-script-provider-python libreoffice-templates
-    texlive texlive-latex-extra texlive-lualatex nomacs
+    texlive texlive-latex-extra texlive-lualatex nomacs adwaita-qt gnome-themes-extra
 
   # Install MailHog
   # Manually running: ~/go/bin/MailHog
