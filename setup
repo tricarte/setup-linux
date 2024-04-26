@@ -438,6 +438,8 @@ mkdir -p "$HOME/bin" \
 # libdbd-sqlite3-perl: Sqlite database driver for Perl DBI.
 # whois: Contains the mkpasswd command line utility to generate password hashes.
 # pwgen: Generate random passwords, written in C (another alternative in perl: makepasswd)
+# libavif-bin: To encode png and jpeg into avif using avifenc
+# entr: Run command / Reload server when files change
 
 # list of common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -454,7 +456,8 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
   iotop lshw hwinfo pv libnss3-tools jq chkservice libperl-dev \
   optipng pngquant jpegoptim imagemagick graphicsmagick bat ripgrep pigz \
   glances smem surfraw sxiv bmon cmatrix timg chafa tty-clock \
-  libmaxminddb-dev libgeoip-dev libfile-mimeinfo-perl inxi gifsicle
+  libmaxminddb-dev libgeoip-dev libfile-mimeinfo-perl inxi gifsicle \
+  libavif-bin entr
 
 # TODO: This may require a virtualenv in near future.
 pip install --user tmuxp
