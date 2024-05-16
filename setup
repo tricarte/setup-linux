@@ -51,7 +51,7 @@ while :; do
 
   read -p "Would you like to also enter the SMTP relay host credentials?  (y/n): " -r
   echo ""
-  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
     SETUP_SMTP=1
     read -rp "Enter an account name of your choice to identify the settings: " SMTP_ACCOUNTNAME
     read -rp "Enter the SMTP relay host address: " SMTP_RELAY_HOST
@@ -189,11 +189,9 @@ get_latest_release() {
 #  List of PPAs  #
 ##################
 
-# Ubuntu 22.04 comes with PHP 8.1
 PPAS=(
   "ppa:ondrej/php"
   "ppa:ondrej/nginx"
-  "ppa:jonathonf/vim-daily"
 )
 
 echo "Adding necessary PPAs..."
@@ -440,27 +438,37 @@ mkdir -p "$HOME/bin" \
 # pwgen: Generate random passwords, written in C (another alternative in perl: makepasswd)
 # libavif-bin: To encode png and jpeg into avif using avifenc
 # entr: Run command / Reload server when files change
+# bat: cat with syntax highligting (binary name is batcat)
+# speedtest-cli: Use the `spd` alias for bandwidth speed test.
+# btm: System resources monitor
+# tealdeer: tldr clone written in Rust
 
-# list of common packages
+# List of common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
   gpg python3-pip xsel mtr-tiny pydf bashtop tmux whois \
   build-essential libssl-dev cmake pkg-config rclone \
   zip unzip autojump highlight par xclip ncal webp pwgen \
   ncdu htop vnstat vnstati iftop mosh ranger httpie ngrep \
   lnav atool silversearcher-ag lynx multitail pandoc libdbd-sqlite3-perl \
-  shellcheck sqlite3 dnstop libpcap-dev libncurses5-dev \
+  shellcheck sqlite3 dnstop libpcap-dev libncurses-dev \
   libsqlite3-dev autoconf secure-delete moreutils libterm-readline-gnu-perl \
   curl stow dnsutils gawk mediainfo rlwrap ppa-purge wrk \
   apache2-utils ntpdate watchman incron hey cloc xjobs parallel \
-  renameutils libncurses5 gdebi-core mailutils postfix- \
+  renameutils libncurses6 gdebi-core mailutils postfix- \
   iotop lshw hwinfo pv libnss3-tools jq chkservice libperl-dev \
   optipng pngquant jpegoptim imagemagick graphicsmagick bat ripgrep pigz \
   glances smem surfraw sxiv bmon cmatrix timg chafa tty-clock \
   libmaxminddb-dev libgeoip-dev libfile-mimeinfo-perl inxi gifsicle \
-  libavif-bin entr
+  libavif-bin entr speedtest-cli cht.sh tealdeer btm universal-ctags \
+  fd-find lf shfmt
+
+# fd-find installs fd as fdfind
+cd /usr/bin && sudo ln -s fdfind fd; sudo ln -s batcat bat
+cd ~
 
 # TODO: This may require a virtualenv in near future.
-pip install --user tmuxp
+# NOTE: Not using tmux anymore, but it eases tmux session creation a lot.
+# pip install --user tmuxp
 
 if [[ $MACHINE == "server" ]]; then
   echo "Configuring ntpdate..."
@@ -470,6 +478,7 @@ if [[ $MACHINE == "server" ]]; then
 fi
 
 # Install nginx and PHP from ondrej PPA
+# php-gmagick conflicts with php-imagick
 echo "Installing Nginx with PHP support..."
 echo ""
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -478,7 +487,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
   php-mysql php-mbstring php-tidy php-xml php-bcmath php-soap \
   php-intl php-readline php-imagick php-msgpack php-igbinary \
   php-dev php-zip php-imap php-gmp php-redis php-apcu phpunit \
-  php-yaml php-gmagick
+  php-yaml
 
 # PHP 7.4 packages
 # sudo NEEDRESTART_SUSPEND=1 apt install \
@@ -551,6 +560,7 @@ opcache.restrict_api=/var/www/localhost
   fi
 fi
 
+# NOTE: This ppa does not support 24.04 yet.
 # Install Vim PPA way which is updated daily.
 # sudo add-apt-repository -y ppa:jonathonf/vim-daily
 # This will also install some ruby stuff.
@@ -558,7 +568,7 @@ fi
 # so we use this package also in server environments.
 echo "Installing VIM..."
 echo ""
-sudo NEEDRESTART_SUSPEND=1 apt install -y vim-gtk3
+# sudo NEEDRESTART_SUSPEND=1 apt install -y vim-gtk3
 
 VIM=$(command -v vim)
 sudo update-alternatives --install /usr/bin/editor editor "$VIM" 1
@@ -572,14 +582,16 @@ if [[ $MACHINE == "server" ]]; then
   sudo NEEDRESTART_SUSPEND=1 apt install -y certbot python3-certbot-nginx
 fi
 
-echo "Installing cheat.sh CLI client..."
-curl -s https://cht.sh/:cht.sh >"$HOME/bin/cht.sh" && chmod +x "$HOME/bin/cht.sh"
+# Installing from repo
+# echo "Installing cheat.sh CLI client..."
+# curl -s https://cht.sh/:cht.sh >"$HOME/bin/cht.sh" && chmod +x "$HOME/bin/cht.sh"
 
-echo "Installing tealdeer: tldr rust implementation..."
-LATEST=$(get_latest_release "dbrgn/tealdeer")
-wget -qO "$HOME/bin/tldr" \
-  "https://github.com/dbrgn/tealdeer/releases/download/$LATEST/tealdeer-linux-x86_64-musl" &&
-  chmod +x "$HOME/bin/tldr"
+# Installing from repo
+# echo "Installing tealdeer: tldr rust implementation..."
+# LATEST=$(get_latest_release "dbrgn/tealdeer")
+# wget -qO "$HOME/bin/tldr" \
+#   "https://github.com/dbrgn/tealdeer/releases/download/$LATEST/tealdeer-linux-x86_64-musl" &&
+#   chmod +x "$HOME/bin/tldr"
 
 echo "Installing choose: alternative to cut and awk written in Rust..."
 LATEST=$(get_latest_release "theryangeary/choose")
@@ -593,29 +605,33 @@ sudo wget -qO "/usr/local/bin/sd" \
   "https://github.com/chmln/sd/releases/download/${LATEST}/sd-${LATEST}-x86_64-unknown-linux-gnu" &&
   sudo chmod +x "/usr/local/bin/sd"
 
-echo "Installing bottom (btm): System resource usage monitor written in Rust..."
-LATEST=$(get_latest_release "ClementTsang/bottom")
-wget -qO "$HOME/bottom.deb" \
-  "https://github.com/ClementTsang/bottom/releases/download/${LATEST}/bottom_${LATEST}_amd64.deb"
-if [[ -f "$HOME/bottom.deb" ]]; then
-    sudo apt install -y "$HOME/bottom.deb"
-fi
+# Installing from repo
+# echo "Installing bottom (btm): System resource usage monitor written in Rust..."
+# LATEST=$(get_latest_release "ClementTsang/bottom")
+# wget -qO "$HOME/bottom.deb" \
+#   "https://github.com/ClementTsang/bottom/releases/download/${LATEST}/bottom_${LATEST}_amd64.deb"
+# if [[ -f "$HOME/bottom.deb" ]]; then
+#     sudo apt install -y "$HOME/bottom.deb"
+# fi
 
 echo "Installing nettop: bandwidth usage by process..."
 git clone --quiet "https://github.com/Emanem/nettop.git" "$HOME/repos/nettop" &&
   cd "$HOME/repos/nettop" && make release && cp ./nettop "$HOME/bin" && cd "$HOME" || exit
 
+# TODO: am i using this
 echo "Adding php support for ctags..."
 wget -qO "$HOME/bin/phpctags" \
   "https://raw.githubusercontent.com/vim-php/phpctags/gh-pages/install/phpctags.phar" &&
   chmod +x "$HOME/bin/phpctags"
 
-echo "Installing universal ctags..."
-# This is also installable from package managers.
-git clone --quiet "https://github.com/universal-ctags/ctags.git" "$HOME/repos/ctags" &&
-  cd "$HOME/repos/ctags" && ./autogen.sh && ./configure && make -j2 &&
-  sudo make install && cd "$HOME" || exit
+# TODO: Installing from repo
+# echo "Installing universal ctags..."
+# # This is also installable from package managers.
+# git clone --quiet "https://github.com/universal-ctags/ctags.git" "$HOME/repos/ctags" &&
+#   cd "$HOME/repos/ctags" && ./autogen.sh && ./configure && make -j2 &&
+#   sudo make install && cd "$HOME" || exit
 
+# TODO: shebang line uses python; convert it to python3
 echo "Installing ps_mem python script"
 sudo wget -qO /usr/local/bin/ps_mem https://raw.githubusercontent.com/pixelb/ps_mem/master/ps_mem.py
 sudo chmod a+x /usr/local/bin/ps_mem
@@ -675,12 +691,17 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y nodejs yarn
 # also can download sub directory of a git repo.
 echo "Installing degit..."
 echo ""
-npm install --location=global degit
+npm install --global degit
 
 # prettier: code formatter
 echo "Installing prettier..."
 echo ""
 npm install --global prettier @prettier/plugin-php
+
+# Process manager for nodejs
+echo "Installing pm2"
+echo ""
+npm install pm2 -g
 
 # intelephense: code completion source for php in vim
 echo "Installing intelephense..."
@@ -690,6 +711,10 @@ npm install --global intelephense
 echo "Installing svgo - svg optimizer"
 echo ""
 npm install --global svgo
+
+echo "Installing bun"
+echo ""
+curl -fsSL https://bun.sh/install | bash
 
 # starship.rs: a shell prompt customized for git repos
 echo "Installing starship - cli prompt"
@@ -703,18 +728,19 @@ npm install --global markdownlint-cli2
 # WordPress-Coding-Standards: php_codesniffer based sniffs for WordPress
 echo "Installing WordPress-Coding-Standards PHPCS Sniffs"
 echo ""
-git clone -b master https://github.com/WordPress/WordPress-Coding-Standards.git "$HOME/repos/wpcs"
+git clone -b main https://github.com/WordPress/WordPress-Coding-Standards.git "$HOME/repos/wpcs"
 "$HOME/.composer/vendor/bin/phpcs" --config-set installed_paths "$HOME/repos/wpcs"
 
-echo "Installing fd-find..."
+# Installing from repo
 # This is for speeding up fuzzy search in ranger,
 # as it is using fzf with 'find' command.
-LATEST=$(get_latest_release "sharkdp/fd")
-cd ~ || exit
-wget -qO "$HOME/fd.deb" \
-  "https://github.com/sharkdp/fd/releases/download/${LATEST}/fd_$(echo "${LATEST}" | tr -d 'v')_amd64.deb"
-sudo dpkg -i "fd.deb"
-rm -f fd.deb
+# echo "Installing fd-find..."
+# LATEST=$(get_latest_release "sharkdp/fd")
+# cd ~ || exit
+# wget -qO "$HOME/fd.deb" \
+#   "https://github.com/sharkdp/fd/releases/download/${LATEST}/fd_$(echo "${LATEST}" | tr -d 'v')_amd64.deb"
+# sudo dpkg -i "fd.deb"
+# rm -f fd.deb
 
 # Moved to direct install
 # Install ripgrep ( ack, ag alternative, written in Rust )
@@ -724,6 +750,7 @@ rm -f fd.deb
 #     "https://github.com/BurntSushi/ripgrep/releases/download/$LATEST/ripgrep_${LATEST}_amd64.deb"
 # sudo dpkg -i "ripgrep_${LATEST}_amd64.deb"
 
+# TODO
 echo "Installing bandwhich - monitor network bandwidth by process..."
 LATEST=$(get_latest_release "imsnif/bandwhich")
 cd ~ || exit
@@ -768,14 +795,13 @@ WantedBy=multi-user.target" | sudo tee /etc/systemd/system/piknik.service
   # sudo systemctl enable piknik.service
 fi
 
-# Install lf file manager
-# TODO: This can be in official repos by the next time you install Ubuntu
-echo "Installing lf - ranger file manager alternative written in Go"
-LATEST=$(get_latest_release "gokcehan/lf")
-cd ~ || exit
-wget -qO "$HOME/lf.tar.gz" \
-  "https://github.com/gokcehan/lf/releases/download/$LATEST/lf-linux-amd64.tar.gz"
-aunpack lf.tar.gz && chmod +x "$HOME/lf" && sudo mv lf /usr/local/bin && rm -f lf.tar.gz
+# TODO: Installing from repo
+# echo "Installing lf - ranger file manager alternative written in Go"
+# LATEST=$(get_latest_release "gokcehan/lf")
+# cd ~ || exit
+# wget -qO "$HOME/lf.tar.gz" \
+#   "https://github.com/gokcehan/lf/releases/download/$LATEST/lf-linux-amd64.tar.gz"
+# aunpack lf.tar.gz && chmod +x "$HOME/lf" && sudo mv lf /usr/local/bin && rm -f lf.tar.gz
 
 # Install pdu
 echo "Installing pdu - Disk usage analyzer written Rust"
@@ -804,14 +830,13 @@ aunpack rustic.tar.gz && chmod +x rustic && sudo mv rustic /usr/local/bin/
 /usr/local/bin/rustic completions bash >"$HOME/.rustic-completions.bash"
 rm -f rustic.tar.gz
 
-# Install shfmt
-# TODO: This is in official repo.
-echo "Installing shfmt - shell script formatter written in GoLang"
-LATEST=$(get_latest_release "mvdan/sh")
-cd ~ || exit
-wget -qO "$HOME/shfmt" \
-  "https://github.com/mvdan/sh/releases/download/${LATEST}/shfmt_${LATEST}_linux_amd64"
-chmod +x shfmt && sudo mv shfmt /usr/local/bin/
+# TODO: Installing from repo
+# echo "Installing shfmt - shell script formatter written in GoLang"
+# LATEST=$(get_latest_release "mvdan/sh")
+# cd ~ || exit
+# wget -qO "$HOME/shfmt" \
+#   "https://github.com/mvdan/sh/releases/download/${LATEST}/shfmt_${LATEST}_linux_amd64"
+# chmod +x shfmt && sudo mv shfmt /usr/local/bin/
 
 echo "Installing perli - A Perl REPL"
 wget -qO "$HOME/bin/perli" \
@@ -851,7 +876,7 @@ source "$HOME/.bashrc"
 if [[ ! -d "$HOME/.config/rustic" ]]; then
   mkdir "$HOME/.config/rustic"
 fi
-cp "$HOME/dotfiles-templates/rustic-profiles/*" "$HOME/.config/rustic"
+cp "${HOME}"/dotfiles-templates/rustic-profiles/* "$HOME/.config/rustic"
 for profile in "${HOME}"/.config/rustic/*.toml; do
   sed -i -e "s:change_me_username:${USER}:g" "$profile"
   if [[ -n $EXTUSBDEVID ]]; then
@@ -880,7 +905,8 @@ git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" config \
   --local status.showUntrackedFiles no
 # Switch from http to ssh for gitlab authentication.
 git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" remote \
-  set-url origin git@gitlab.com:tricarte/dotfiles_ng.git
+  set-url gitlab_remote git@gitlab.com:tricarte/dotfiles_ng.git
+  # set-url github_remote git@github.com:tricarte/dotfiles.git # For github
 git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" config \
   core.sshCommand "ssh -o IdentitiesOnly=yes -i ~/.ssh/github-id_rsa -F /dev/null"
 
@@ -1002,19 +1028,15 @@ if [[ $MACHINE == "desktop" ]]; then
   # https://flathub.org/repo/flathub.flatpakrepo
 
   # ppa:graphics-drivers/ppa : Latest NVIDIA drivers
-  # ppa:maarten-baert/simplescreenrecorder" # This PPA does not exist for 2204
-  # ppa:kisak/kisak-mesa: Latest stable Mesa drivers
+  # ppa:kisak/kisak-mesa: Latest stable Mesa drivers (no 24.04 yet)
   # ppa:wereturtle/ppa: ghostwriter markdown editor
+  # ppa:jonmagon/kdiskmark: SSD benchmark
+  # ppa:slgobinath/safeeyes: (no 24.04 yet)
+  # ppa:savoury1/gimp: (no 24.04 yet)
   PPAS=(
-    "ppa:kisak/kisak-mesa"
     "ppa:mkusb/ppa"
-    "ppa:savoury1/gimp"
-    "ppa:kdenlive/kdenlive-stable"
-    "ppa:slgobinath/safeeyes"
-    "ppa:jonmagon/kdiskmark"
     "ppa:graphics-drivers/ppa"
     "ppa:libreoffice/ppa"
-    "ppa:wereturtle/ppa"
   )
 
   echo "Adding necessary PPAs for the desktop..."
@@ -1035,6 +1057,9 @@ if [[ $MACHINE == "desktop" ]]; then
   # texlive: For generating pdf from markdown using pandoc
   # nomacs: Photo editor, viewer
   # adwaita-qt and gnome-themes-extra: For audacity look and feel
+  # kwin-bismuth: tiling window manager for KDE
+  # rofi: Think of fzf with a gui.
+  # xdotool: Scripting mouse actions (mainly used for centering the cursor)
   echo "Installing desktop related apps..."
   echo ""
   sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -1046,8 +1071,9 @@ if [[ $MACHINE == "desktop" ]]; then
     ubuntu-restricted-addons filelight libnotify-bin \
     ghostwriter libstartup-notification0 screenkey \
     libreoffice-numbertext libreoffice-script-provider-js \
-    libreoffice-script-provider-python libreoffice-templates
-    texlive texlive-latex-extra texlive-lualatex nomacs adwaita-qt gnome-themes-extra
+    libreoffice-script-provider-python libreoffice-templates \
+    texlive texlive-latex-extra texlive-lualatex nomacs adwaita-qt \
+    gnome-themes-extra kwin-bismuth rofi mpv xdotool nsxiv
 
   # Install MailHog
   # Manually running: ~/go/bin/MailHog
@@ -1076,11 +1102,12 @@ EOL
     sudo apt install -y "$HOME/repos/debs/dragon/dragon-drag-and-drop_1.1.1-1_amd64.deb"
   fi
 
+  # nsxiv in official repo is newer than this
   # Install nsxiv image viewer from local deb
-  echo "Installing nsxiv image viewer"
-  if [[ -f "$HOME/repos/debs/nsxiv/nsxiv_30-2_amd64.deb" ]]; then
-    sudo apt install -y "$HOME/repos/debs/nsxiv/nsxiv_30-2_amd64.deb"
-  fi
+  # echo "Installing nsxiv image viewer"
+  # if [[ -f "$HOME/repos/debs/nsxiv/nsxiv_30-2_amd64.deb" ]]; then
+  #   sudo apt install -y "$HOME/repos/debs/nsxiv/nsxiv_30-2_amd64.deb"
+  # fi
 
   # Install lockrun from local deb
   echo "Installing lockrun"
@@ -1097,10 +1124,11 @@ git clone --quiet "https://github.com/tricarte/wpsite" "$HOME/repos/wpsite"
 git clone --quiet "https://github.com/tricarte/wpready3" "$HOME/repos/wpready3"
 
 # Add post-commit hook to run 'composer wpstarter'
-echo "#!/usr/bin/env bash
-export PATH=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin\"
-composer wpstarter" >"$HOME/repos/wpready3/.git/hooks/post-commit"
-chmod +x "$HOME/repos/wpready3/.git/hooks/post-commit"
+# TODO: Isn't this tracked?
+# echo "#!/usr/bin/env bash
+# export PATH=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin\"
+# composer wpstarter" >"$HOME/repos/wpready3/.git/hooks/post-commit"
+# chmod +x "$HOME/repos/wpready3/.git/hooks/post-commit"
 
 chmod +x "$HOME/repos/wpsite/wpsite"
 # ln -s "$HOME/repos/wpsite/wpsite" "$HOME/bin/wpsite"
@@ -1339,11 +1367,14 @@ env[ADMINER_PASSWORD] = password
 EOT
 
   if [[ -f /etc/nginx/sites-available/valet.conf ]]; then
-    if ! grep -q client_max_body_size /etc/nginx/sites-available/valet.conf; then
-      sudo sed -i -e "/charset.*/a client_max_body_size 1500M;" \
-        /etc/nginx/sites-available/valet.conf
-      sudo sed -i -e "/default_server;$/c\    localhost 80 default_server;" \
-        /etc/nginx/sites-available/valet.conf
+      # Since latest valet-linux client_max_body_size is set to 128M
+    # if ! grep -q client_max_body_size /etc/nginx/sites-available/valet.conf; then
+    #   sudo sed -i -e "/charset.*/a client_max_body_size 1500M;" \
+    #     /etc/nginx/sites-available/valet.conf
+
+      # Not necessary since latest valet-linux
+      # sudo sed -i -e "/default_server;$/c\    localhost 80 default_server;" \
+      #   /etc/nginx/sites-available/valet.conf
     fi
   fi
 
@@ -1364,6 +1395,7 @@ EOT
   # that script must be in /etc/NetworkManager/dispatcher.d.
   echo "server=127.0.0.1" | sudo tee /etc/dnsmasq.d/server
 
+  # TODO: Backup the original file
   cat <<EOT >>"/etc/dnsmasq.d/options"
 resolv-file=/opt/valet-linux/dns-servers
 listen-address=127.0.0.1
@@ -1403,7 +1435,7 @@ if [[ $MACHINE == "desktop" ]]; then
   wget -qO "$HOME/veracrypt.deb" "$download_url"
 
   if [[ -f "$HOME/veracrypt.deb" ]]; then
-    sudo apt instal -y "$HOME/veracrypt.deb"
+    sudo apt install -y "$HOME/veracrypt.deb"
   else
     echo "Could not download veracrypt!"
     echo "The url was: ${download_url}."
@@ -1488,7 +1520,6 @@ DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
 FLUSH PRIVILEGES;
 EOS
 "
-# TODO: Use kde file dialog within Firefox: widget.use-xdg-desktop-portal.file-picker
 # TODO: https://github.com/eafer/rdrview Command line html/webpage viewer.
 # TODO: https://github.com/strizhechenko/netutils-linux This may be only useful for
 # real servers. A set of tools for monitoring and tuning the network stack.
