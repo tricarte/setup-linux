@@ -1120,8 +1120,20 @@ fi # End of installation of desktop applications
 # Install wpsite
 echo "Installing wpsite..."
 echo ""
-git clone --quiet "https://github.com/tricarte/wpsite" "$HOME/repos/wpsite"
-git clone --quiet "https://github.com/tricarte/wpready3" "$HOME/repos/wpready3"
+chmod +x "$HOME/repos/wpsite/wpsite"
+if [[ ! -d "$HOME/repos/wpsite" ]]; then
+    git clone --quiet git@github.com:tricarte/wpsite.git "$HOME/repos/wpsite"
+fi
+if [[ ! -d "$HOME/repos/wpready3" ]]; then
+    git clone --quiet "git@github.com:tricarte/wpsite.git" "$HOME/repos/wpsite"
+    git clone --quiet "git@github.com:tricarte/wpready3.git" "$HOME/repos/wpready3"
+fi
+sudo ln -s "$HOME/repos/wpsite/wpsite" "/usr/local/bin/wpsite"
+sudo ln -s "$HOME/repos/wpsite/wpsite" "/usr/local/bin/wps"
+if [[ ! -f "$HOME/.wpsite-completion.bash" ]]; then
+    ln -s "$HOME/repos/wpsite/.wpsite-completion.bash" "$HOME/.wpsite-completion.bash"
+fi
+
 
 # Add post-commit hook to run 'composer wpstarter'
 # TODO: Isn't this tracked?
@@ -1130,11 +1142,12 @@ git clone --quiet "https://github.com/tricarte/wpready3" "$HOME/repos/wpready3"
 # composer wpstarter" >"$HOME/repos/wpready3/.git/hooks/post-commit"
 # chmod +x "$HOME/repos/wpready3/.git/hooks/post-commit"
 
-chmod +x "$HOME/repos/wpsite/wpsite"
-# ln -s "$HOME/repos/wpsite/wpsite" "$HOME/bin/wpsite"
-sudo ln -s "$HOME/repos/wpsite/wpsite" "/usr/local/bin/wpsite"
-sudo ln -s "$HOME/repos/wpsite/wpsite" "/usr/local/bin/wps"
-ln -s "$HOME/repos/wpsite/.wpsite-completion.bash" "$HOME/.wpsite-completion.bash"
+echo "Installing rstc - wrapper script for rustic backup tool"
+if [[ ! -d "$HOME/repos/rstc" ]]; then
+    git clone "git@github.com:tricarte/rstc.git" "$HOME/repos/rstc"
+fi
+chmod +x "$HOME/repos/rstc/rstc"
+sudo ln -s "$HOME/repos/rstc/rstc" "/usr/local/bin/rstc"
 
 # Lock root user
 if [[ $MACHINE == "server" ]]; then
