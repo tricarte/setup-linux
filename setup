@@ -1048,6 +1048,8 @@ if [[ $MACHINE == "desktop" ]]; then
   sudo apt update -y && sudo apt upgrade -y
 
   # ubuntu-restricted-addons: For Intel Quick Sync accelerated video encoding in Kdenlive
+  # But since we install Kdenlive using flatpak from 24.04 and on,
+  # Kdenlive may not be able to use it.
   # feh: Fast image file viewer
   # dnsmasq: For valet-linux
   # barrier: Synergy alternative
@@ -1066,7 +1068,7 @@ if [[ $MACHINE == "desktop" ]]; then
     adb fastboot appmenu-gtk2-module appmenu-gtk3-module \
     barrier dnsmasq feh plasma-discover-backend-flatpak \
     gimp gimp-gap gimp-gmic gimp-lensfun gimp-texturize \
-    glmark2 kdenlive mkusb mkusb-nox usb-pack-efi \
+    glmark2 mkusb mkusb-nox usb-pack-efi \
     safeeyes simplescreenrecorder sqlitebrowser zeal \
     ubuntu-restricted-addons filelight libnotify-bin \
     ghostwriter libstartup-notification0 screenkey \
@@ -1074,6 +1076,28 @@ if [[ $MACHINE == "desktop" ]]; then
     libreoffice-script-provider-python libreoffice-templates \
     texlive texlive-latex-extra texlive-lualatex nomacs adwaita-qt \
     gnome-themes-extra kwin-bismuth rofi mpv xdotool nsxiv
+  
+    echo "Installing Firefox"
+    # Install Firefox:
+    # First remove snapped firefox
+    sudo snap remove firefox
+    # This directory already exists.
+    sudo install -d -m 0755 /etc/apt/keyrings
+    # Import the signing key
+    wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | sudo tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
+    # Add the repo sources list
+    echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | sudo tee -a /etc/apt/sources.list.d/mozilla.list > /dev/null
+    # Prioritize apt packages from Mozilla
+    echo '
+Package: *
+Pin: origin packages.mozilla.org
+Pin-Priority: 1000
+' | sudo tee /etc/apt/preferences.d/mozilla
+    # Finally install Firefox
+    sudo apt update && sudo apt install -y firefox
+    # Use kde file dialog within Firefox:
+    # Go to `about:config`
+    # and set widget.use-xdg-desktop-portal.file-picker to 1
 
   # Install MailHog
   # Manually running: ~/go/bin/MailHog
