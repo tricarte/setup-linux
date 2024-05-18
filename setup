@@ -1063,6 +1063,8 @@ if [[ $MACHINE == "desktop" ]]; then
   # kwin-bismuth: tiling window manager for KDE
   # rofi: Think of fzf with a gui.
   # xdotool: Scripting mouse actions (mainly used for centering the cursor)
+  # yt-dlp: A command line video downloader including YouTube (mpv installs
+  # this as recommends)
   echo "Installing desktop related apps..."
   echo ""
   sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -1172,6 +1174,7 @@ if [[ ! -d "$HOME/repos/rstc" ]]; then
     git clone "git@github.com:tricarte/rstc.git" "$HOME/repos/rstc"
 fi
 chmod +x "$HOME/repos/rstc/rstc"
+ln -s "$HOME/repos/rstc/.rstc-completion.bash" "$HOME/.rstc-completion.bash"
 sudo ln -s "$HOME/repos/rstc/rstc" "/usr/local/bin/rstc"
 
 # Lock root user
@@ -1512,6 +1515,8 @@ exit
 
 # https://gist.githubusercontent.com/BAGELreflex/c04e7a25d64e989cbd9376a9134b8f6d/raw/eea51d63d32dc97ff434a75b192eccaf66609ffb/cdm_fio.sh
 # Copy above fio script to bin and `cdm_fio.sh ./`. Change $LOOP variable. IO Benchmark
+
+# TODO: FreshRSS valet link directory is the 'p' directory.
 
 # TODO: kitty installation and launching
 # $HOME/.local/kitty.app/bin/kitty --listen-on unix:/tmp/mykitty
