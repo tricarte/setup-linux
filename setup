@@ -617,6 +617,12 @@ sudo wget -qO "/usr/local/bin/fx" \
   "https://github.com/antonmedv/fx/releases/download/${LATEST}/fx_linux_amd64" &&
   sudo chmod +x "/usr/local/bin/fx"
 
+echo "Installing oha: http server load testing benchmarking..."
+LATEST=$(get_latest_release "hatoo/oha")
+sudo wget -qO "/usr/local/bin/oha" \
+  "https://github.com/hatoo/oha/releases/download/${LATEST}/oha-linux-amd64-pgo" &&
+  sudo chmod +x "/usr/local/bin/oha"
+
 # Installing from repo
 # echo "Installing bottom (btm): System resource usage monitor written in Rust..."
 # LATEST=$(get_latest_release "ClementTsang/bottom")
@@ -709,6 +715,10 @@ npm install --global degit
 echo "Installing prettier..."
 echo ""
 npm install --global prettier @prettier/plugin-php
+
+echo "Installing typing-game-cli..."
+echo ""
+npm install --global typing-game-cli
 
 # Process manager for nodejs
 echo "Installing pm2"
