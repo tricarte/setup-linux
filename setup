@@ -443,6 +443,11 @@ mkdir -p "$HOME/bin" \
 # btm: System resources monitor
 # tealdeer: tldr clone written in Rust
 # bison + flex: Listed by `spc doctor` as required
+# libevent-dev: Recommended by workerman
+# pinentry-tty: After 24.04, `--pinentry-mode loopback` stopped caching the
+# passphrase. TODO: You have to add this setting to ~/.gnupg/gpg-agent.conf
+# pinentry-program /usr/bin/pinentry-tty or better to use:
+# sudo update-alternatives --set pinentry /usr/bin/pinentry-tty
 
 # List of common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -461,7 +466,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
   glances smem surfraw sxiv bmon cmatrix timg chafa tty-clock \
   libmaxminddb-dev libgeoip-dev libfile-mimeinfo-perl inxi gifsicle \
   libavif-bin entr speedtest-cli cht.sh tealdeer btm universal-ctags \
-  fd-find lf shfmt bison flex
+  fd-find lf shfmt bison flex libevent-dev pinentry-tty
 
 # fd-find installs fd as fdfind
 cd /usr/bin && sudo ln -s fdfind fd; sudo ln -s batcat bat
@@ -605,6 +610,12 @@ LATEST=$(get_latest_release "chmln/sd")
 sudo wget -qO "/usr/local/bin/sd" \
   "https://github.com/chmln/sd/releases/download/${LATEST}/sd-${LATEST}-x86_64-unknown-linux-gnu" &&
   sudo chmod +x "/usr/local/bin/sd"
+
+echo "Installing fx: terminal json viewer and processor..."
+LATEST=$(get_latest_release "antonmedv/fx")
+sudo wget -qO "/usr/local/bin/fx" \
+  "https://github.com/antonmedv/fx/releases/download/${LATEST}/fx_linux_amd64" &&
+  sudo chmod +x "/usr/local/bin/fx"
 
 # Installing from repo
 # echo "Installing bottom (btm): System resource usage monitor written in Rust..."
