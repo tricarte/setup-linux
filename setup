@@ -1086,6 +1086,7 @@ if [[ $MACHINE == "desktop" ]]; then
   # xdotool: Scripting mouse actions (mainly used for centering the cursor)
   # yt-dlp: A command line video downloader including YouTube (mpv installs
   # this as recommends)
+  # piperwire-alsa: Without this, Audacity does not detect recording devices.
   echo "Installing desktop related apps..."
   echo ""
   sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -1099,8 +1100,8 @@ if [[ $MACHINE == "desktop" ]]; then
     libreoffice-numbertext libreoffice-script-provider-js \
     libreoffice-script-provider-python libreoffice-templates \
     texlive texlive-latex-extra texlive-lualatex nomacs adwaita-qt \
-    gnome-themes-extra kwin-bismuth rofi mpv xdotool nsxiv
-  
+    gnome-themes-extra kwin-bismuth rofi mpv xdotool nsxiv pipewire-alsa
+
     echo "Installing Firefox"
     # Install Firefox:
     # First remove snapped firefox
