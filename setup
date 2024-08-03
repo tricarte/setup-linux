@@ -449,6 +449,7 @@ mkdir -p "$HOME/bin" \
 # pinentry-program /usr/bin/pinentry-tty or better to use:
 # sudo update-alternatives --set pinentry /usr/bin/pinentry-tty
 # hyperfine: benchmark speed comparion of different programs
+# at: alternative to quick and temporary cron jobs
 
 # List of common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -467,7 +468,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
   glances smem surfraw sxiv bmon cmatrix timg chafa tty-clock \
   libmaxminddb-dev libgeoip-dev libfile-mimeinfo-perl inxi gifsicle \
   libavif-bin entr speedtest-cli cht.sh tealdeer btm universal-ctags \
-  fd-find lf shfmt bison flex libevent-dev pinentry-tty hyperfine
+  fd-find lf shfmt bison flex libevent-dev pinentry-tty hyperfine at
 
 # fd-find installs fd as fdfind
 cd /usr/bin && sudo ln -s fdfind fd; sudo ln -s batcat bat
