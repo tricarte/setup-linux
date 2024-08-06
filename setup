@@ -469,6 +469,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
   libmaxminddb-dev libgeoip-dev libfile-mimeinfo-perl inxi gifsicle \
   libavif-bin entr speedtest-cli cht.sh tealdeer btm universal-ctags \
   fd-find lf shfmt bison flex libevent-dev pinentry-tty hyperfine at
+  wkhtmltopdf
 
 # fd-find installs fd as fdfind
 cd /usr/bin && sudo ln -s fdfind fd; sudo ln -s batcat bat
