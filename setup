@@ -788,6 +788,15 @@ wget -qO "$HOME/bandwhich.tar.gz" \
 aunpack bandwhich.tar.gz && mv bandwhich ~/bin &&
   rm -f bandwhich.tar.gz
 
+# For now, just move the rip binary to ~/bin
+#
+# echo "Installing rip - Safely delete files..."
+# LATEST=$(get_latest_release "MilesCranmer/rip2")
+# cd ~ || exit
+# wget -qO "$HOME/rip.tar.gz" \
+#   "https://github.com/MilesCranmer/rip2/releases/download/${LATEST}/rip-Linux-x86_64-musl.tar.gz"
+# aunpack rip.tar.gz && mv rip ~/bin && rm -f rip.tar.gz
+
 echo "Installing glow (Markdown viewer)..."
 LATEST=$(get_latest_release "charmbracelet/glow")
 cd ~ || exit
