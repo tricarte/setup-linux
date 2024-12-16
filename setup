@@ -865,7 +865,7 @@ cd ~ || exit
 wget -qO "$HOME/rustic.tar.gz" \
   "https://github.com/rustic-rs/rustic/releases/download/${LATEST}/rustic-${LATEST}-x86_64-unknown-linux-gnu.tar.gz"
 aunpack rustic.tar.gz && chmod +x rustic && sudo mv rustic /usr/local/bin/
-/usr/local/bin/rustic completions bash >"$HOME/.rustic-completions.bash"
+/usr/local/bin/rustic completions bash | tee "${HOME}/.rustic-completions.bash"
 rm -f rustic.tar.gz
 
 # TODO: Installing from repo
@@ -1104,6 +1104,7 @@ if [[ $MACHINE == "desktop" ]]; then
   # this as recommends)
   # piperwire-alsa: Without this, Audacity does not detect recording devices.
   # groff + ghostscript: Alternative PDF engine for markdown conversion
+  # ccls: C/C++ Language server
   echo "Installing desktop related apps..."
   echo ""
   sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -1118,7 +1119,7 @@ if [[ $MACHINE == "desktop" ]]; then
     libreoffice-script-provider-python libreoffice-templates \
     texlive texlive-latex-extra texlive-lualatex nomacs adwaita-qt \
     gnome-themes-extra kwin-bismuth rofi mpv xdotool nsxiv pipewire-alsa \
-    groff ghostscript
+    groff ghostscript ccls
 
     echo "Installing Firefox"
     # Install Firefox:
