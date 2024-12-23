@@ -1106,6 +1106,7 @@ if [[ $MACHINE == "desktop" ]]; then
   # piperwire-alsa: Without this, Audacity does not detect recording devices.
   # groff + ghostscript: Alternative PDF engine for markdown conversion
   # ccls: C/C++ Language server
+  # kleopatra: gpg, openpgp key/certificate GUI
   echo "Installing desktop related apps..."
   echo ""
   sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -1120,7 +1121,7 @@ if [[ $MACHINE == "desktop" ]]; then
     libreoffice-script-provider-python libreoffice-templates \
     texlive texlive-latex-extra texlive-lualatex nomacs adwaita-qt \
     gnome-themes-extra kwin-bismuth rofi mpv xdotool nsxiv pipewire-alsa \
-    groff ghostscript ccls mp3gain
+    groff ghostscript ccls mp3gain kleopatra
 
     echo "Installing Firefox"
     # Install Firefox:
