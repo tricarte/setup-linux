@@ -1573,6 +1573,10 @@ exit
 # SERVER: After configuring ssmtp or msmtp correctly, you do not have to touch php.ini.
 # Because these smtp clients create symlinks to sendmail which is used by PHP by default.
 
+# Code::Blocks (codeblocks) installation
+# sudo add-apt-repository ppa:x-psoud/cbreleases
+# sudo apt install codeblocks -y
+
 # TODO: Disable nginx and mariadb if this is a desktop.
 # TODO: dropwatch
 # TODO: https://github.com/rahulunair/repo-peek Tool to browse Github/Gitlab
