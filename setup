@@ -953,8 +953,9 @@ git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" config \
 echo "Installing MariaDB..."
 echo ""
 sudo apt purge mysql* mariadb* -y
-# mysqldump along with many other database related tools
-# come with mariadb-client package.
+# mysqldump, mysqlreport, mysqlslap along with many other database related
+# tools come with mariadb-client package. The ones starting with 'mysql' are
+# actually symlinks to '/usr/bin/mariadb-xyz'.
 sudo NEEDRESTART_SUSPEND=1 apt install mariadb-server mariadb-client -y
 # 'sudo mysql' drops you into sql shell by default.
 # But you can't do anything admin related.
