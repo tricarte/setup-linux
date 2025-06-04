@@ -1071,12 +1071,12 @@ if [[ $MACHINE == "desktop" ]]; then
   # ppa:kisak/kisak-mesa: Latest stable Mesa drivers (no 24.04 yet)
   # ppa:wereturtle/ppa: ghostwriter markdown editor
   # ppa:jonmagon/kdiskmark: SSD benchmark
-  # ppa:slgobinath/safeeyes: (no 24.04 yet)
   # ppa:savoury1/gimp: (no 24.04 yet)
   PPAS=(
     "ppa:mkusb/ppa"
     "ppa:graphics-drivers/ppa"
     "ppa:libreoffice/ppa"
+    "ppa:safeeyes-team/safeeyes"
   )
 
   echo "Adding necessary PPAs for the desktop..."
