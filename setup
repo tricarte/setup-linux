@@ -1122,7 +1122,7 @@ if [[ $MACHINE == "desktop" ]]; then
     libreoffice-script-provider-python libreoffice-templates \
     texlive texlive-latex-extra texlive-lualatex nomacs adwaita-qt \
     gnome-themes-extra kwin-bismuth rofi mpv xdotool nsxiv pipewire-alsa \
-    groff ghostscript ccls mp3gain kleopatra kitty-terminfo
+    groff ghostscript ccls mp3gain kleopatra kitty-terminfo brightnessctl
 
     echo "Installing Firefox"
     # Install Firefox:
