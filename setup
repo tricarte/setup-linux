@@ -645,11 +645,11 @@ echo "Installing nettop: bandwidth usage by process..."
 git clone --quiet "https://github.com/Emanem/nettop.git" "$HOME/repos/nettop" &&
   cd "$HOME/repos/nettop" && make release && cp ./nettop "$HOME/bin" && cd "$HOME" || exit
 
-# TODO: am i using this
-echo "Adding php support for ctags..."
-wget -qO "$HOME/bin/phpctags" \
-  "https://raw.githubusercontent.com/vim-php/phpctags/gh-pages/install/phpctags.phar" &&
-  chmod +x "$HOME/bin/phpctags"
+# TODO: Since switching to neovim, no longer using it
+# echo "Adding php support for ctags..."
+# wget -qO "$HOME/bin/phpctags" \
+#   "https://raw.githubusercontent.com/vim-php/phpctags/gh-pages/install/phpctags.phar" &&
+#   chmod +x "$HOME/bin/phpctags"
 
 # TODO: Installing from repo
 # echo "Installing universal ctags..."
