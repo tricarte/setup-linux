@@ -1102,7 +1102,7 @@ if [[ $MACHINE == "desktop" ]]; then
   # adwaita-qt and gnome-themes-extra: For audacity look and feel
   # kwin-bismuth: tiling window manager for KDE
   # rofi: Think of fzf with a gui.
-  # xdotool: Scripting mouse actions (mainly used for centering the cursor)
+  # xdotool: Scripting mouse actions (mainly used for centering the cursor, ydotool for wayland)
   # yt-dlp: A command line video downloader including YouTube (mpv installs
   # this as recommends)
   # piperwire-alsa: Without this, Audacity does not detect recording devices.
