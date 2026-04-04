@@ -451,6 +451,7 @@ mkdir -p "$HOME/bin" \
 # hyperfine: benchmark speed comparion of different programs
 # at: alternative to quick and temporary cron jobs
 # pass-otp: A 'pass' extension providing totp support
+# pipx: Install pyhton end-user applications into their own virtualenvs
 
 # List of common packages
 sudo NEEDRESTART_SUSPEND=1 apt install -y \
@@ -470,7 +471,7 @@ sudo NEEDRESTART_SUSPEND=1 apt install -y \
   libmaxminddb-dev libgeoip-dev libfile-mimeinfo-perl inxi gifsicle \
   libavif-bin entr speedtest-cli cht.sh tealdeer btm universal-ctags \
   fd-find lf shfmt bison flex libevent-dev pinentry-tty hyperfine at
-  wkhtmltopdf pass pass-otp brotli iperf3 cpanoutdated
+  wkhtmltopdf pass pass-otp brotli iperf3 cpanoutdated pipx
 
 # fd-find installs fd as fdfind
 cd /usr/bin && sudo ln -s fdfind fd; sudo ln -s batcat bat
