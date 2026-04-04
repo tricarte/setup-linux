@@ -756,6 +756,12 @@ echo "Installing markdownlint"
 echo ""
 npm install --global markdownlint-cli2
 
+# live-server
+# Another alternative: python3-livereload
+echo "Installing live-server"
+echo ""
+npm install --global live-server
+
 # WordPress-Coding-Standards: php_codesniffer based sniffs for WordPress
 echo "Installing WordPress-Coding-Standards PHPCS Sniffs"
 echo ""
